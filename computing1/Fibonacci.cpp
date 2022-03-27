@@ -1,28 +1,152 @@
+#include "Fibonacci.h"
+template<class T> void Fb_heap<T>::listadd(Fb_node * &r, Fb_node * ptr){
+    if(r == nullptr){
+        r= ptr ;
+        r->right = r ;
+        r->left = r ;
+    }
+    else{
+        Fb_node* rr=r ;
+        ptr->right=rr->right ;
+        ptr->left = rr ;
+        rr->right->left=ptr ;
+        rr->right= ptr ;
+    }
 
-template<class T> class Fb_heap{
-private :
-    struct Fb_node
-    {
-        T dataitem ;
-        struct Fb_node *parent;
-        struct Fb_node *child;
-        struct Fb_node *left;
-        struct Fb_node *right;
-        bool mark;
-        int degree;
-        Fb_node() : dataitem(0), parent(nullptr), child(nullptr), left(this), right(this), mark(false), degree(0){}
-        Fb_node(T _data,Fb_node* _parent,Fb_node* _child,Fb_node* _left, Fb_node* _right,bool _mark,int _degree) : dataitem(_data), parent(_parent), child(_child), left(_left), right(_right), mark(_mark), degree(_degree){}
-    };
-private :
-    Fb_node* minnode;
-    int numnodes; 
-public:
-    void insert(Fb_node *newnode);
-    void delete_min(void);
-    void heapunion(Fb_heap* heap1);
-    void consolidate(void);
-    void decrease(Fb_node *dnode,T k);
+}
+template<class T> void Fb_heap<T>::deleteln(Fb_node* p){
+    p->right->left = p->left ;
+    p->left->right = p->right; //delete this node in the list
+}
 
-};
+template<class T> void Fb_heap<T>::linkheap(Fb_node * p1, Fb_node * p2){
+    deleteln(p1);
+    linkheap(p2->child,p1);
+    p1->mark = false ;
+    p2->degree++;
+}
+
+template<class T> void Fb_heap<T>::cutheap(Fb_node * p1, Fb_node * p2){ // p2 is the parent of p1
+    deleteln(p1) ;
+    p2->degree-- ;
+    listadd(minnode,p1);
+    p1->mark = false ;
+    p1->parent = nullptr ;
+}
+
+template<class T> void Fb_heap<T>::markcut(Fb_node* p){
+    Fb_node* pnode = p->parent ;
+    if (pnode != nullptr){
+        if(p->mark == false){
+            p->mark = true ;
+        }
+        else{
+            cut(p,pnode) ;
+            cutmark (pnode) ;
+        }
+     }
+}
+
+
+
+template<class T> void Fb_heap<T>::insert(T k){
+    Fb_node * newnd = new Fb_node ;
+    newnd->dataitem= k ;
+    listadd(minnode,newnd) ;
+    if(k< minnode->dataitem){
+        minnode= newnd ;
+    }
+    numnodes++ ; 
+}
+
+template<class T> void Fb_heap<T>:: consolidate(void){
+    vector<Fb_node*> Tl(Dn(),nullptr) ;
+    int dgr ;
+    Fb_node *a1, *b1, *c1 ;
+    Fb_node *sentry = new Fb_node ;
+    listadd( minnode->left,sentry);
+    for(a1=minnode; a1!=sentry ; a1=b1){ //check every list node to ensure no two nodes are in same degree;
+        b1=a1->right ;
+        dgr=a1->degree ;
+        while(Tl[dgr]!= nullptr){  // if two nodes have the same degree, add the bigger one into the tree of smaller one;
+            c1 = Tl[dgr] ;
+            if(c1->dataitem < a1->dataitem){
+                Fb_node* temp= c1 ;
+                c1 = a1 ;
+                a1 = temp ;
+            }
+            linkheap(c1,a1) ;
+            Tl[dgr]= nullptr ;
+            dgr++ ;
+        }
+        Tl[dgr]= a1 ;
+    }
+    /*then we need to find the minnode */
+    minnode = nullptr ;
+    for (int i =0; i<Tl.size(); i++){
+        if(Tl[i]!= nullptr){
+            if(minnode==nullptr){
+                listadd(minnode,Tl[i]) ; 
+                minnode = Tl[i] ;
+            }
+            else{
+                listadd(minnode,T[i]) ;
+                if (Tl[i]->dataitem < minnode->dataitem) {
+                    minnode=Tl[i] ;
+                }
+            }
+        }
+    }
+    delete sentry ;
+}
+
+template<class T> T Fb_heap<T>:: delete_min(){
+    Fb_node* p=minnode ;
+    if(p==nullptr){
+        return 0 ; // 或者报错
+    } 
+    T rtval = p->dataitem ;
+    if(p->child){ //if p has child, put his children into root list
+        Fb_node * x= p->child ;
+        Fb_node * y= x.right ;
+        for(int i=0;i<p->degree;i++){
+            listadd(minnode,x);
+            x->parent=nullptr ;
+            x=y ;
+            y=y->right ;
+        }
+    }
+    if(p==p->right){ //if root list has only one node
+        minnode = nullptr ;
+    }
+    else{
+        min = p->right ;
+        deleteln(p) ;
+        consolidate();
+    }
+    numnodes-- ;
+    delete p ;
+    return rtval ;
+}
+
+template<class T> void Fb_heap<T>:: decrease(Fb_node *dnode,T k){
+    if(dnode->dataitem <= k){
+        return ;
+    }
+    dnode->dataitem = k ;
+    Fb_node* prtnode= dnode->parent ;
+    if((prtnode != nullptr)&&(prtnode->dataitem > dnode->dataitem)){
+        cutheap(dnode,prtnode) ;
+        markcut(prtnode);
+    } 
+    if(dnode->dataitem < minnode->dataitem){
+        minnode= dnode ;
+    }
+}
+
+template<class T> void Fb_heap<T>::deletenode(Fb_node *p){
+    decrease(p,(minnode->dataitem)-1) ;
+    delete_min();
+}
 
 
