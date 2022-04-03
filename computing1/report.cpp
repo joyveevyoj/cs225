@@ -6,9 +6,11 @@ using namespace std;
 double Weeklyreport::waitingtime1(double a, double b){
     return b - a;
 }
+
 double Weeklyreport::waitingtime2(double a, double b){
     return b - a;
 }
+
 double Weeklyreport::waitingtime3(double a, double b){
     return b - a;
 }
@@ -57,7 +59,6 @@ void Weeklyreport::Save()
 			<< waitingtime3(rl[i]->show_appointment_time(), rl[i]->show_treatment_time()) << endl;
             ofs.close();
             }
-
 	}
 
 	//关闭文件
@@ -85,7 +86,6 @@ void Weeklyreport::Sort()
 					{
 						Max = j;
 					}
-			
             	}
                 
 				else if (select == 2) //升序
@@ -94,7 +94,6 @@ void Weeklyreport::Sort()
 					{
 						Max = j;
 					}
-			
             	} 
             
 				if (select == 3) //升序
@@ -103,10 +102,8 @@ void Weeklyreport::Sort()
 					{
 						Max = j;
 					}
-			
             	}
             }
-
 
 			//判断一开始认定 最小值或最大值 是不是 计算的最小值或最大值，如果不是 交换数据
 			if (i != Max)
@@ -124,15 +121,88 @@ void Weeklyreport::Sort()
 			
 }
 
-double Monthlyreport::average_time(double a, double b, int n){
-    return b - a;
+int Monthlyreport::getlength(vector<person<int>*> report_list){
+    int length=report_list.capacity();
+    return length;
 }
 
-int main()
-{
-    int a;
-    // Monthlyreport a;
-    // int b = a.average_time(3,2,1);
-    // cout << b << endl;
-    return 0;
+double Monthlyreport::average_time(vector<person<int>*> report_list){
+    int treatment_number;
+    int sum;
+    for (int i = 0; i < getlength(rl); i++){
+        
+        if (rl[i]->status==3){
+            double waiting_time = rl[i]->show_treatment_time() - rl[i]->show_register_time();
+            sum += waiting_time;  
+            treatment_number++;   
+        }
+    }
+    double mean = sum/treatment_number;
+    return mean;
 }
+    
+int Monthlyreport::appointment_num(vector<person<int>*> report_list){    
+    int appointment_number;
+    for (int i = 0; i < getlength(rl); i++){
+        
+        if (rl[i]->status==2){
+            appointment_number++;
+        }
+    }
+    return appointment_number;
+}
+
+int Monthlyreport::withdraw_num(vector<person<int>*> report_list){    
+    int withdraw_number;
+    for (int i = 0; i < getlength(rl); i++){
+        
+        if (rl[i]->is_withdraw()==1){
+            withdraw_number++;
+        }
+    }
+    return withdraw_number;
+}
+
+int Monthlyreport::treatment_num(vector<person<int>*> report_list){    
+    int treatment_number;
+    for (int i = 0; i < getlength(rl); i++){
+        
+        if (rl[i]->status==3){
+            treatment_number++;
+        }
+    }
+    return treatment_number;
+}
+
+int Monthlyreport::register_waiting_num(int a, int b){//register_number-appoint_number
+    int num = a - b;
+    return num;
+}
+
+int Monthlyreport::intotal_waiting_num(int a, int b){//register_number-treatment_number
+    int num = a - b;
+    return num;
+}
+
+void Monthlyreport::Save()
+{
+	//将每个人数据写入到文件中
+	for (int i = 0; i < getlength(rl); i++)
+	{   
+            ofstream ofs;
+	        ofs.open("monthly_report.txt", ios::out); // 用输出的方式打开文件  -- 写文件
+			ofs << "rigister_number " << getlength(rl) << " "
+            << "register_waiting_number " << register_waiting_num(getlength(rl), appointment_num(rl)) << " "
+            << "intotal_waiting_number " << register_waiting_num(getlength(rl), treatment_num(rl)) << " "
+            << "appointment_number " << appointment_num(rl) << " "
+            << "average_waiting_time " << average_time(rl) << " "
+			<< "withdraw_number " << withdraw_num(rl) << endl;
+            ofs.close();
+     }
+}
+
+	//关闭文件
+	
+    
+
+
