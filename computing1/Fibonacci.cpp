@@ -1,4 +1,7 @@
 #include "Fibonacci.h"
+#include<vector>
+using namespace std ;
+
 template<class T> void Fb_heap<T>::listadd(Fb_node * &r, Fb_node * ptr){
     if(r == nullptr){
         r= ptr ;
@@ -90,7 +93,7 @@ template<class T> void Fb_heap<T>:: consolidate(void){
                 minnode = Tl[i] ;
             }
             else{
-                listadd(minnode,T[i]) ;
+                listadd(minnode,Tl[i]) ;
                 if (Tl[i]->dataitem < minnode->dataitem) {
                     minnode=Tl[i] ;
                 }
@@ -120,7 +123,7 @@ template<class T> T Fb_heap<T>:: delete_min(){
         minnode = nullptr ;
     }
     else{
-        min = p->right ;
+        minnode = p->right ;
         deleteln(p) ;
         consolidate();
     }
@@ -148,5 +151,35 @@ template<class T> void Fb_heap<T>::deletenode(Fb_node *p){
     decrease(p,(minnode->dataitem)-1) ;
     delete_min();
 }
+
+/* template<class T> Fb_node* Fb_heap<T>::search(Fb_node* nn,T k){
+    if (nn == nullptr){
+        return nullptr ;
+    }
+    Fb_node * x=nn ;
+    Fb_node * y ;
+    do{
+        if(x->dataitem== k){
+            return x ;
+        }
+        else if(k> x->dataitem){
+            y = search(x->child,k);
+            if(y != nullptr){
+                return y ;
+            }
+        }
+        x=x->right ;
+    }while(x!= nn) ;
+
+    return nullptr ;
+}
+
+template<class T> void Fb_heap<T>::update(T k, T nk){
+    Fb_node* x= search(minnode, k) ;
+    if(x){
+        
+    }
+    
+} */
 
 
