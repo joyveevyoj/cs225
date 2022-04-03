@@ -16,8 +16,6 @@ public:
     T front(void);
     void pushback(T value);
     T popfront();
-
-
 private:
     int maxsize, minsize;
     int first, last;
@@ -25,7 +23,10 @@ private:
     T* reprarray;
     void allocate(void);
     void deallocate(void);
+};
 
+template<class T>class LocalQueue : public fifo<T>
+{
 
 };
 
@@ -34,8 +35,10 @@ template <class T>class person
 {
 public:
     person();
+    person(string tableline);
     void set_key();
     T return_key();
+
     int status;
     
 private:
