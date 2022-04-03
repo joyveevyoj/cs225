@@ -1,5 +1,7 @@
 #ifndef Fibonacci_h
 #define Fibonacci_h
+#include<cmath>
+#include<vector>
 template<class T> class Fb_heap
 {
 private :
@@ -24,14 +26,15 @@ private :
     void markcut(Fb_node* p);
     Fb_node* minnode;
     int numnodes; 
+    //Fb_node* search(Fb_node* nn,T k) ;
 public:
-    FibHeap() : minnode(nullptr), numnodes(0) {} ;
+    Fb_heap() : minnode(nullptr), numnodes(0) {} ;
     void insert(T k);
     T delete_min(void);
-    void heapunion(Fb_heap* heap1);
     void consolidate(void);
     void decrease(Fb_node *dnode,T k);
     void deletenode(Fb_node *p) ;
+    //void update(T k, T nk) ; //  update dataitem k into nk
 
 };
 
