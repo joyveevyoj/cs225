@@ -1,48 +1,60 @@
 #include "report.h"
-#include<vector>
-#include <stdio.h>
-#include <iostream>
+
 using namespace std;
-#include <fstream>
 
 
-void Weeklyreport::save()
+double Weeklyreport::waitingtime1(double a, double b){
+    return b - a;
+}
+double Weeklyreport::waitingtime2(double a, double b){
+    return b - a;
+}
+double Weeklyreport::waitingtime3(double a, double b){
+    return b - a;
+}
+
+int Weeklyreport::getlength(vector<person<int>*> report_list){
+    int length=report_list.capacity();
+    return length;
+}
+
+void Weeklyreport::Save()
 {
-	string s1 = "File1.txt";
-    string s2 = "File2.txt";
-    string s3 = "File3.txt";
+	string s1 = "WeeklyFile1.txt";
+    string s2 = "WeeklyFile2.txt";
+    string s3 = "WeeklyFile3.txt";
 	//将每个人数据写入到文件中
-	for (int i = 0; i < num; i++)
+	for (int i = 0; i < getlength(rl); i++)
 	{   
         if(rl[i]->status==1){
             ofstream ofs;
 	        ofs.open(s1, ios::out); // 用输出的方式打开文件  -- 写文件
 		    ofs << rl[i]->show_name() << " "
-			<< rl[i]->prof << " "
-            << rl[i]->age << " "
-            << rl[i]->risk << " "
-			<< rl[i]->waitingtime << endl;
+			<< rl[i]->show_prof() << " "
+            << rl[i]->show_age() << " "
+            << rl[i]->show_risk() << " "
+			<< waitingtime1(rl[i]->show_register_time(), current_time) << endl;
             ofs.close();
             }
         else if(rl[i]->status==2)
             {
             ofstream ofs;
 	        ofs.open(s2, ios::out); // 用输出的方式打开文件  -- 写文件
-		    ofs << rl<person*>[i]->name << " "
-			<< rl<person*>[i]->prof << " "
-            << rl<person*>[i]->age << " "
-            << rl<person*>[i]->risk << " "
-			<< rl<person*>[i]->waitingtime << endl;
+		    ofs << rl[i]->show_name() << " "
+			<< rl[i]->show_prof() << " "
+            << rl[i]->show_age() << " "
+            << rl[i]->show_risk() << " "
+			<< waitingtime2(rl[i]->show_appointment_time(), rl[i]->show_register_time()) << endl;
             ofs.close();
             }
         else{
             ofstream ofs;
 	        ofs.open(s3, ios::out); // 用输出的方式打开文件  -- 写文件
-		    ofs << rl<person<int>*>[i]->name << " "
-			<< rl<person<int>*>[i]->prof << " "
-            << rl<person<int>*>[i]->age << " "
-            << rl<person<int>*>[i]->risk << " "
-			<< rl<person<int>*>[i]->waitingtime << endl;
+		    ofs << rl[i]->show_name() << " "
+			<< rl[i]->show_prof() << " "
+            << rl[i]->show_age() << " "
+            << rl[i]->show_risk() << " "
+			<< waitingtime3(rl[i]->show_appointment_time(), rl[i]->show_treatment_time()) << endl;
             ofs.close();
             }
 
@@ -50,7 +62,7 @@ void Weeklyreport::save()
 
 	//关闭文件
 	
-
+    
 }
 
 void Weeklyreport::Sort()
@@ -58,41 +70,69 @@ void Weeklyreport::Sort()
     	cout << "请选择排序方式：" << endl;
 		cout << "1、按name进行排序" << endl;
 		cout << "2、按professioin进行排序" << endl;
-        cout << "2、按risk进行排序" << endl;
+        cout << "3、按risk进行排序" << endl;
 
 		int select = 0;
 		cin >> select;
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < getlength(rl); i++)
 		{
-			int minOrMax = i; //声明最小值 或 最大值下标
-			for (int j = i + 1; j < num; j++)
+			int Max = i; //声明最小值 或 最大值下标
+			for (int j = i + 1; j < getlength(rl); j++)
 			{
 				if (select == 1) //升序
 				{
-					if (rl[minOrMax]->name > rl[j]->name)
+					if (rl[Max]->show_name() > rl[j]->show_name())
 					{
-						minOrMax = j;
+						Max = j;
 					}
-				}
-				elseif (select) //降序
+			
+            	}
+                
+				else if (select == 2) //升序
 				{
-					
-				}
-			}
+					if (rl[Max]->show_prof() > rl[j]->show_prof())
+					{
+						Max = j;
+					}
+			
+            	} 
+            
+				if (select == 3) //升序
+				{
+					if (rl[Max]->show_risk() > rl[j]->show_risk())
+					{
+						Max = j;
+					}
+			
+            	}
+            }
+
 
 			//判断一开始认定 最小值或最大值 是不是 计算的最小值或最大值，如果不是 交换数据
-			if (i != minOrMax)
+			if (i != Max)
 			{
-				Worker * temp = this->m_EmpArray[i];
-				this->m_EmpArray[i] = this->m_EmpArray[minOrMax];
-				this->m_EmpArray[minOrMax] = temp;
+				vector<person<int>*> temp;
+                temp[1] = rl[i];
+				rl[i] = rl[Max];
+				rl[Max] = temp[1];
 			}
 			
 		}
 
-		cout << "排序成功！排序后的结果为： " << endl;
-		this->save(); //排序后结果保存到文件中
-		this->Show();//展示所有职工
-	
-	
+		cout << "排序成功！请查看文件 " << endl;
+		this->Save(); //排序后结果保存到文件中
+			
+}
+
+double Monthlyreport::average_time(double a, double b, int n){
+    return b - a;
+}
+
+int main()
+{
+    int a;
+    // Monthlyreport a;
+    // int b = a.average_time(3,2,1);
+    // cout << b << endl;
+    return 0;
 }
