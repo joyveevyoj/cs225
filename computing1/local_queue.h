@@ -35,13 +35,13 @@ public:
     void set_key();
     T return_key();
     void update_status(int status_number);
-    void show_name();
-    void show_prof();
-    void show_age();
-    void show_risk();
-    void show_waitingtime();
+    string show_name();
+    string show_prof();
+    string show_age();
+    string show_risk();
+    string show_waitingtime();
 
-    
+
     int status;
 private:
     bool initial_register;  //true if register for the first time
