@@ -36,7 +36,7 @@ private:
 class hospital
 {
 public:
-  hospital(int capacity, double o_time, double c_time);
+  hospital(int idnum, int capacity, double o_time, double c_time);
   bool is_hospital_available(int h_date);
   double get_time_appointed(int h_date);
   int daily_appointment_num;
@@ -54,3 +54,13 @@ private:
 };
 
 #endif
+
+template <class T> class reportlist
+{
+  public:
+  void push_new(int r_status, person<int>* patient);//push a new person into the report list, and set his status value
+  void push_old(int r_status, person<int>* patient);//use a temperary person to update the person already in the report list and set his status value
+  void push_appoi(int r_status, appointment*) r_appointment);//put the appointment information into the person stored in the report list and set his status value
+  private:
+  vector<person<int>*> rl;// a vector list that stores all the information about that person
+};
