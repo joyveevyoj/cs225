@@ -1,7 +1,12 @@
 // Data structure for local_queue
-// Test for git:
+
 #include <iostream>
 #include "local_queue.h"
+#include <string>
+#include <cstring>
+#include <stdlib.h>
+#include <time.h>
+
 using namespace std;
 
 template<class T> fifo<T>::fifo(int size)
@@ -111,15 +116,40 @@ template<class T>void fifo<T>::deallocate()
     return;
 }
 
+
+
+
+
+
+template<class T>void person<T>::random_generate()
+{
+
+  
+}
+
+
 template<class T> person<T>::person()
 {
+    srand((unsigned)time(0));
+    string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    int i;
+    //Create name
+    int namelength = rand() % 5 + 2;
+    name.resize(namelength);
+    for(i = 0; i < namelength;i++)
+    {
+        int index = rand() % 26;
+        name[i] = alphabet[index];
+    }
+    cout << name << endl;
+    
 
 }
 template<class T> void person<T>::set_key()
 {
     //525699 is the largest time in minute within a year
     //register time priority
-    key = 525699 - calc_time;
+    key = 525699 - calculate_time;
 
     //Withdraw priority
     if ((withdraw == true) && ((risk == 0) || (risk == 1)))
@@ -134,7 +164,7 @@ template<class T> void person<T>::set_key()
     }
     if( risk == 3)
     {
-        if( isempty() != true)
+        //if( local_queue_id.is != true)
         {
             key = -1;
             return; //if there are others in queue, set key to minimum
@@ -154,7 +184,14 @@ template<class T> void person<T>::set_key()
     return;
 }
 
-template<class T> T person<T>::rt_key()
+template<class T> T person<T>::return_key()
 {   
     return key;
+}
+
+int main()
+{
+    person<int> p1;
+    p1.random_generate();
+
 }
