@@ -121,11 +121,14 @@ template<class T>void fifo<T>::deallocate()
 
 
 
-
-
 template<class T> person<T>::person()
 {
-    srand((unsigned)time(NULL));
+    return;
+}
+
+template<class T>void person<T>::random_generate(int seed)
+{
+    srand(clock() * seed);
     string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     string integer_set = "0123456789";
     int i;//index for loop
@@ -287,6 +290,7 @@ template<class T>string* person<T>::show_format_time()
     int* Day = new int[3];
     double* Hour = new double[3];
     int* Minute = new int[3];
+    int* intHour = new int[3];
     string* format_time = new string[3];
 
     //Set month,day,hour,minute
@@ -295,25 +299,26 @@ template<class T>string* person<T>::show_format_time()
     Hour = this->show_hour();
     for(int i = 0; i < 3;i++)
     {
-        if(Time[i == -1])
+        if(Time[i] == -1)
         {
             Minute[i] = -1;
+            intHour[i] = -1;
             continue;
         }
-        int intHour = (int)Hour[i];
-        Minute[i] = (int) ((intHour - Hour[i]) * 60);
+        intHour[i] = (int)Hour[i];
+        Minute[i] = (int) ((Hour[i] - intHour[i]) * 60);
     }
     for(int i = 0; i < 3;i++)
     {
-        if(Time[i == -1])
+        if(Time[i] == -1)
         {
             format_time[i] = "N/A";
             continue;
         }
-        format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " " + to_string(intHour[i] % 24 ) + "-" + to_string(Minute[i]);
+        format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " " + to_string(intHour[i] % 24 ) + ":" + to_string(Minute[i]);
         //Format: 2022-3-27 19:22
-        return format_time;
     }
+    return format_time;
 
 
 
@@ -364,16 +369,14 @@ template<class T> T person<T>::return_key()
 
 int main()
 {
-    person<int> p1;
-    double* t1;
-    int* t2;
-    t1 = p1.show_hour();
-    t2 = p1.show_day();
-    
-    cout << t1[0] << endl;
-    cout << t2[0] << endl;
-    cout << p1.show_week()[0] << endl;
-    cout << p1.show_month()[0] << endl;
-    cout << p1.show_format_time() << endl;
+    person<int> p1[10];
+    for(int i =0; i < 10; i++)
+    {
+        p1[i].random_generate(i);
 
+    }
+    for(int i = 0;i < 10; i++)
+    {
+        cout << p1[i].show_format_time()[0] << endl;
+    }
 }

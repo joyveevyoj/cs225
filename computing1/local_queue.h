@@ -30,8 +30,10 @@ private:
 template <class T>class person
 {
 public:
-    person();   //If no argument, create a random one
+
+    person();       //If no argument, create one
     person(string tableline);   //Create a person from local registry
+    void random_generate(int seed); //Used to put random attributes into a person
     void set_key();
     T return_key();
     void update_status(int status_number);
