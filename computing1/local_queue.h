@@ -25,22 +25,24 @@ private:
     void deallocate(void);
 };
 
-template<class T>class LocalQueue : public fifo<T>
-{
-
-};
 
 
 template <class T>class person
 {
 public:
-    person();
-    person(string tableline);
+    person();   //If no argument, create a random one
+    person(string tableline);   //Create a person from local registry
     void set_key();
     T return_key();
+    void update_status(int status_number);
+    void show_name();
+    void show_prof();
+    void show_age();
+    void show_risk();
+    void show_waitingtime();
 
-    int status;
     
+    int status;
 private:
     bool initial_register;  //true if register for the first time
     bool letter;    //true if there is letter for ddl
@@ -48,11 +50,11 @@ private:
     int prof;   //0,1,2,3,4,5,6,7, the larger, the higher priority
     int age;    //0,1,2,3,4,5,6, the larger, the higher priority
     bool withdraw;  //true if withdraw
-    //fifo<person> local_queue_id;    //Which Local queue this guy is in
+    fifo<person<T>*> local_registry_id;    //Which Local registry this guy is in
     //appointment_list
     //hospital
     //appointment_time出堆时间
-    //waiting_time
+    //waiting_time;
     //有没有来就诊 Bool 
     string id;
     string name;
