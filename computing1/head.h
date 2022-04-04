@@ -50,7 +50,7 @@ public:
     int show_prof();
     int show_age();
     int show_risk();
-
+    
     double* show_hour();
     int* show_day();
     int* show_week();
@@ -59,6 +59,7 @@ public:
     
     bool is_update(person<int>* oldper); //check whether this is an update
     bool is_newwithdraw(person<int>* oldper);//check whether this is a new withdraw
+    bool is_register_after_withdraw();
     bool is_withdraw();
     bool is_appointed();
     void update_appointed();
@@ -124,12 +125,12 @@ private :
     //Fb_node* search(Fb_node* nn,T k) ;
 public:
     Fb_heap() : minnode(nullptr), numnodes(0) {} ;
-    void insert(T k);
-    T delete_min(void);
+    void insert(person<int>* newpatient);
+    person<int>* delete_min(void);
     void consolidate(void);
     void decrease(Fb_node *dnode,T k);
-    void deletenode(Fb_node *p) ;
-    //void update(T k, T nk) ; //  update dataitem k into nk
+    void deletenode(person<int>* oldpatient) ;
+    void update(person<int>*newpatient, person<int>* oldpatient) ; //  update dataitem k into nk
 
 };
 
@@ -142,10 +143,11 @@ public:
   void make_appointment();
   void appointment_withdraw();
   void pretty_print();
+  bool is_appointment_passed();
+  int hospital_id;
+  person<int> patient;
     
 private:
-  person<int> patient;
-  int hospital_id;
   int date;
   double time;
 };
