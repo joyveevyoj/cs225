@@ -56,10 +56,13 @@ public:
     int* show_week();
     int* show_month();  //从零开始的统一时间
     string* show_format_time();
-
+    
+    bool is_update(person<int>* oldper); //check whether this is an update
+    bool is_newwithdraw(person<int>* oldper);//check whether this is a new withdraw
     bool is_withdraw();
     bool is_appointed();
     void update_appointed();
+    int local_id;
     int status;
     int hosp_num;
     vector<hospital*> hospital_ranking_list;//the hospital's  ranking list
