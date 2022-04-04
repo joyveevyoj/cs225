@@ -4,6 +4,8 @@
 #define local_queue_h
 #include <string>
 #include <cstring>
+#include <vector>
+#include <fstream>
 
 using namespace std;
 template <class T> class fifo
@@ -30,20 +32,32 @@ private:
 template <class T>class person
 {
 public:
+    friend class TableWrite;
+    friend class Weeklyreport;
+    friend class Monthlyreport;
 
     person();       //If no argument, create one
     person(string tableline);   //Create a person from local registry
-    void random_generate(int seed); //Used to put random attributes into a person
+    void random_generate(int seed,int week); //Used to put random attributes into a person. Seed表示这个人的种子，用于随机生成,week表示生成在第几周的人
     void set_key();
     T return_key();
     void update_status(int status_number);
-    string show_name();
-    int show_prof();
-    int show_age();
-    int show_risk();
+    // string show_id();
+    // string show_Wechat();
+    // string show_phone());
+    // string show_address();
+    // string show_email();
+    // string show_name();
+    // string show_prof();
+    // int show_prof_id();
+    // string show_age();
+    // int show_age_id();
+    // string show_risk();
+    // int show_risk_id();  //对重要的类来说这些都可以直接友元访问，若其他情况下需要再添加所需函数即可
 
     double* show_hour();
     int* show_day();
+    int* show_half_day();
     int* show_week();
     int* show_month();  //从零开始的统一时间
     string* show_format_time();
@@ -80,30 +94,27 @@ private:
 
     int calculate_time;  //Time after calculation, used for key value, unit in minutes; 
     T key;
-
 };
 
 
+class people
+{
+
+};
+
+class TableWrite
+{
+public:
+    void table_create(string filename,int num,int week); //num:创建的人的个数, 这个文件对应第几周
+    void table_line(person<int> p); //给每一个人创造一行
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+private:
+    string tableline;
+    ofstream outfile;
+    void table_open(string filename);
+    void table_close();
+};
 
 
 #endif

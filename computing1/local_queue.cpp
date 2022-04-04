@@ -126,9 +126,9 @@ template<class T> person<T>::person()
     return;
 }
 
-template<class T>void person<T>::random_generate(int seed)
+template<class T>void person<T>::random_generate(int seed, int week)
 {
-    srand(clock() * seed);
+    srand((unsigned)((time(NULL)) * (seed * seed)));
     string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     string integer_set = "0123456789";
     int i;//index for loop
@@ -223,7 +223,7 @@ template<class T>void person<T>::random_generate(int seed)
 
     //Create Time
     Time = new double[3];
-    Time[0] = rand() % 2015 + 0.1 * (rand() % 10);//2016时暂不考虑  
+    Time[0] = (week * 168) + (rand() % 168) + 0.1 * (rand() % 10);//2016时暂不考虑  
     Time[1] = -1;
     Time[2] = -1;   //-1表示不知道目前appointment time和treatment time为什么时候
 
@@ -231,10 +231,48 @@ template<class T>void person<T>::random_generate(int seed)
     //Create Withdraw and priority letter;
     withdraw = false;
     letter = false;
-
-
 }
+// template<class T>string person<T>::show_id()
+// {
+//     return this->id;
+// }
+// template<class T>string person<T>::show_name()
+// {
+//     return this->name;
+// }
+// template<class T>string person<T>::show_email()
+// {
+//     return this->email;
+// }
+// template<class T>string person<T>::show_address()
+// {
+//     return this->address;
+// }
 
+// template<class T> string person<T>::show_prof()
+// {
+//     return this->prof;
+// }
+// template<class T> int person<T>::show_prof_id()
+// {
+//     return this->show_prof_id();
+// }
+// template<class T> string person<T>::show_age()
+// {
+//     return this->age;
+// }
+// template<class T> int person<T>::show_age_id()
+// {
+//     return this->age_id;
+// }
+// template<class T> string person<T>::show_risk()
+// {
+//     return this->risk;
+// }
+// template<class T> int person<T>::show_risk_id()
+// {
+//     return this->risk_id;
+// }
 
 template<class T> double* person<T>::show_hour()
 {
@@ -253,6 +291,22 @@ template<class T> int* person<T>::show_day()
         Day[i] = (int)(Time[i] / 24);
     }
     return Day;
+}
+
+template<class T>int* person<T>::show_half_day()
+{
+    int* Day = this->show_day();
+    int* half_day = new int[3];
+    for(int i = 0; i < 3;i++)
+    {
+        if(Time[i] == -1)
+        {
+            half_day[i] = -1;
+            continue;
+        }
+        half_day[i] = Day[i] * 2;
+    }
+    return half_day;
 }
 
 template<class T> int* person<T>::show_week()
@@ -367,16 +421,16 @@ template<class T> T person<T>::return_key()
     return key;
 }
 
-int main()
-{
-    person<int> p1[10];
-    for(int i =0; i < 10; i++)
-    {
-        p1[i].random_generate(i);
+// int main()
+// {
+//     person<int> p1[10];
+//     for(int i =0; i < 10; i++)
+//     {
+//         p1[i].random_generate(i,2);
 
-    }
-    for(int i = 0;i < 10; i++)
-    {
-        cout << p1[i].show_format_time()[0] << endl;
-    }
-}
+//     }
+//     for(int i = 0;i < 10; i++)
+//     {
+//         cout << p1[i].show_format_time()[0] << endl;
+//     }
+// }
