@@ -39,17 +39,16 @@ private:
 template <class T>class person
 {
 public:
-
     person();       //If no argument, create one
     person(string tableline);   //Create a person from local registry
     void random_generate(int seed); //Used to put random attributes into a person
     void set_key();
     T return_key();
     void update_status(int status_number);
-    string show_name();
-    int show_prof();
-    int show_age();
-    int show_risk();
+    // string show_name();
+    // int show_prof();
+    // int show_age();
+    // int show_risk(); //对重要的类来说这些都可以直接友元访问，若其他情况下需要再添加所需函数即可
     
     double* show_hour();
     int* show_day();
@@ -76,24 +75,17 @@ private:
     string prof;    //String name for profession
     int age_id;
     string age;    //0,1,2,3,4,5,6, the larger, the higher priority
+    int local_registry_id;  //Which Local registry this guy is in
     bool withdraw;  //true if withdraw
     bool appointed; //True if apppointment is made
     
-    fifo<person<T>*> local_registry_id;    //Which Local registry this guy is in
     double* Time; //表示时间的数组，0为registeration，1为appointment， 2为treatment
-    //appointment_list
-    //hospital
-    //appointment_time出堆时间
-    //waiting_time;
-    //有没有来就诊 Bool 
     string id;
     string name;
     string address;
     string phone;
     string Wechat;
     string email;
-
-    int calculate_time;  //Time after calculation, used for key value, unit in minutes; 
     T key;
 
 };
