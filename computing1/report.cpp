@@ -1,4 +1,6 @@
 #include "report.h"
+#include "local_queue.cpp"
+#include "local_queue.h"
 
 using namespace std;
 
@@ -31,32 +33,32 @@ void Weeklyreport::Save()
         if(rl[i]->status==1){
             ofstream ofs;
 	        ofs.open(s1, ios::out); // 用输出的方式打开文件  -- 写文件
-		    ofs << rl[i]->show_name() << " "
-			<< rl[i]->show_prof() << " "
-            << rl[i]->show_age() << " "
-            << rl[i]->show_risk() << " "
-			<< waitingtime1(rl[i]->show_register_time(), current_time) << endl;
+		    ofs << rl[i]->name << " "
+			<< rl[i]->prof << " "
+            << rl[i]->age << " "
+            << rl[i]->risk<< " "
+			<< waitingtime1(rl[i]->Time[0], current_time) << endl;
             ofs.close();
             }
         else if(rl[i]->status==2)
             {
             ofstream ofs;
 	        ofs.open(s2, ios::out); // 用输出的方式打开文件  -- 写文件
-		    ofs << rl[i]->show_name() << " "
-			<< rl[i]->show_prof() << " "
-            << rl[i]->show_age() << " "
-            << rl[i]->show_risk() << " "
-			<< waitingtime2(rl[i]->show_appointment_time(), rl[i]->show_register_time()) << endl;
+		    ofs << rl[i]->name << " "
+			<< rl[i]->prof << " "
+            << rl[i]->age << " "
+            << rl[i]->risk << " "
+			<< waitingtime2(rl[i]->Time[1], rl[i]->Time[0]) << endl;
             ofs.close();
             }
-        else{
+        else if(rl[i]->status==3){
             ofstream ofs;
 	        ofs.open(s3, ios::out); // 用输出的方式打开文件  -- 写文件
-		    ofs << rl[i]->show_name() << " "
-			<< rl[i]->show_prof() << " "
-            << rl[i]->show_age() << " "
-            << rl[i]->show_risk() << " "
-			<< waitingtime3(rl[i]->show_appointment_time(), rl[i]->show_treatment_time()) << endl;
+		    ofs << rl[i]->name << " "
+			<< rl[i]->prof << " "
+            << rl[i]->age << " "
+            << rl[i]->risk << " "
+			<< waitingtime3(rl[i]->Time[1], rl[i]->Time[2]) << endl;
             ofs.close();
             }
 	}
@@ -82,7 +84,7 @@ void Weeklyreport::Sort()
 			{
 				if (select == 1) //升序
 				{
-					if (rl[Max]->show_name() > rl[j]->show_name())
+					if (rl[Max]->name > rl[j]->name)
 					{
 						Max = j;
 					}
@@ -90,7 +92,7 @@ void Weeklyreport::Sort()
                 
 				else if (select == 2) //升序
 				{
-					if (rl[Max]->show_prof() > rl[j]->show_prof())
+					if (rl[Max]->prof > rl[j]->prof)
 					{
 						Max = j;
 					}
@@ -98,7 +100,7 @@ void Weeklyreport::Sort()
             
 				if (select == 3) //升序
 				{
-					if (rl[Max]->show_risk() > rl[j]->show_risk())
+					if (rl[Max]->risk > rl[j]->risk)
 					{
 						Max = j;
 					}
@@ -132,7 +134,7 @@ double Monthlyreport::average_time(vector<person<int>*> report_list){
     for (int i = 0; i < getlength(rl); i++){
         
         if (rl[i]->status==3){
-            double waiting_time = rl[i]->show_treatment_time() - rl[i]->show_register_time();
+            double waiting_time = rl[i]->Time[2] - rl[i]->Time[0];
             sum += waiting_time;  
             treatment_number++;   
         }
@@ -145,7 +147,7 @@ int Monthlyreport::appointment_num(vector<person<int>*> report_list){
     int appointment_number;
     for (int i = 0; i < getlength(rl); i++){
         
-        if (rl[i]->status==2){
+        if (rl[i]->status==2 || rl[i]->status==3){
             appointment_number++;
         }
     }
@@ -156,7 +158,7 @@ int Monthlyreport::withdraw_num(vector<person<int>*> report_list){
     int withdraw_number;
     for (int i = 0; i < getlength(rl); i++){
         
-        if (rl[i]->is_withdraw()==1){
+        if (rl[i]->status==4 || rl[i]->status==5){
             withdraw_number++;
         }
     }
@@ -202,7 +204,5 @@ void Monthlyreport::Save()
 }
 
 	//关闭文件
-	
     
-
 
