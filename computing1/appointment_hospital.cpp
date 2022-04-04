@@ -5,8 +5,8 @@ using namespace std;
 #include "head.h"
 
 
-hospital::hospital(int capacity, double o_time, double c_time)
-:daily_capacity(capacity), open_time(o_time), close_time(c_time){
+hospital::hospital(int idnum, int capacity, double o_time, double c_time)
+:id(idnum), daily_capacity(capacity), open_time(o_time), close_time(c_time){
 for (int j=0; j<100; j++){daily_remaining_capacity[j]=daily_capacity;
 cout<<"daily:"<< daily_remaining_capacity[j]<<"\n";}
 //initalize all the remaining capacity as daily capacity
@@ -34,16 +34,23 @@ double hospital::get_time_appointed(int h_date){
 //this function add the new appointment to the hospital's apppointment list
   void hospital::add_to_applist(appointment* new_app){
 daily_appointment_list.push_back(new_app);
-
+return;
   }
 
 void hospital::printapp(int date){
   
 }
+void hospital::withdraw_app(appointment* w_app){//需要写，将appointment 从vector里面删除， 并且将那个人的appointment 重新设为 NULL
 
 
 
-appointment::appointment(person* a_patient, int date_out_of_queue):patient(*a_patient){
+
+}
+
+
+
+appointment::appointment(person<int>* a_patient, int date_out_of_queue)
+:patient(a_patient):hospitals(a_hospital_list){
     date= date_out_of_queue+1;//by default the appointment date should be the next day the person is out of queue
     hospital_id=-1;
 }
@@ -51,13 +58,13 @@ appointment::appointment(person* a_patient, int date_out_of_queue):patient(*a_pa
 void appointment:: make_appointment(){
 while(hospital_id==-1&&date<100){//keep searching for days until available hospital is found
 int i=0;
-while (i< patient.hosp_num && (*(patient.hospital_ranking_list[i])).is_hospital_available(date) == false){i++;
+while (i< patient->hosp_num && (hospitals[hospital_id])->is_hospital_available(date) == false){i++;
     //in one day, keep searching for all hospitals in the person's hospital ranking list, until 
     //one available is found
 }
-if(i<patient.hosp_num){
-    hospital_id=(*(patient.hospital_ranking_list[i])).id;
-    time=(*(patient.hospital_ranking_list[i])).get_time_appointed(date);}
+if(i<patient->hosp_num){
+    hospital_id=patient->hospital_ranking_list[i];
+    time=(hospitals[hospital_id])->get_time_appointed(date);}
 else{date++;
 }
 }
@@ -71,14 +78,22 @@ void appointment::pretty_print(){
   
 }
 
-void appointment:: appointment_withdraw(){
+
+
+bool appointment::is_appointment_passed(double current_hour){
+double app_hour = (double)(date*24)+time;
+if(app_hour<=current_hour){return true;}
+else{return false;}
 
 }
 
 
+ 
 
-person::person(int n, vector<hospital*> l)
-{hosp_num=n; 
- hospital_ranking_list=l;}
+
+
+
+
+
 
  
