@@ -55,7 +55,7 @@ private:
 
 #endif
 
-template <class T> class reportlist
+class reportlist
 {
   public:
   void push_new(int r_status, person<int>* patient);//push a new person into the report list, and set his status value
