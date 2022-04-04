@@ -65,7 +65,8 @@ public:
     int local_id;
     int status;
     int hosp_num;
-    vector<hospital*> hospital_ranking_list;//the hospital's  ranking list
+    vector<int> hospital_ranking_list;//the hospital's  ranking list with hospital id as element
+    appointment* p_appoint;
 private:
     bool initial_register;  //true if register for the first time
     bool letter;    //true if there is letter for ddl
@@ -130,14 +131,15 @@ public:
 class appointment
 {
 public:
-  appointment(person<int>* a_patient, int date_out_of_queue);
+  appointment(person<int>* a_patient, int date_out_of_queue,vector<hospital*> a_hospital_list);
   //virtual ~appointment();
   void make_appointment();
   void appointment_withdraw();
   void pretty_print();
-  bool is_appointment_passed();
+  bool is_appointment_passed(double current_hour);
   int hospital_id;
-  person<int> patient;
+  person<int>* patient;
+  vector<hospital*> hospitals;
     
 private:
   int date;
@@ -171,7 +173,7 @@ class reportlist
   public:
   void push_new(int r_status, person<int>* patient);//push a new person into the report list, and set his status value
   void push_old(int r_status, person<int>* patient);//use a temperary person to update the person already in the report list and set his status value
-  void push_appoi(int r_status, appointment*) r_appointment);//put the appointment information into the person stored in the report list and set his status value
+  void push_appoi(int r_status, appointment* r_appointment);//put the appointment information into the person stored in the report list and set his status value
   person<int>* exist(person<int>* ); //this function checks the temperary person's id and see whether it is already in the report list, if it is                                 
                                     //return the person's addr, else return null
   vector<person<int>*> rl;// a vector list that stores all the information about that person
@@ -236,6 +238,8 @@ private:
 
     vector<person<int>*> rl;
 };
+
+
 
 
 #endif
