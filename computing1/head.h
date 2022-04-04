@@ -61,6 +61,7 @@ template <class T> class reportlist
   void push_new(int r_status, person<int>* patient);//push a new person into the report list, and set his status value
   void push_old(int r_status, person<int>* patient);//use a temperary person to update the person already in the report list and set his status value
   void push_appoi(int r_status, appointment*) r_appointment);//put the appointment information into the person stored in the report list and set his status value
-  private:
+  person<int>* exist(person<int>* ); //this function checks the temperary person's id and see whether it is already in the report list, if it is                                 
+  private:                           //return the person's addr, else return null
   vector<person<int>*> rl;// a vector list that stores all the information about that person
 };
