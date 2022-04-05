@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <cmath>
+#include <iomanip>//fibo堆加的
+#include <cstdlib>//fibo堆加的
 using namespace std;
 
 int main(){
@@ -27,8 +29,8 @@ int main(){
   localqueues.push_back(localqueue_2);
   
 
-  hospital* hospital_0 = new hospital(0, 10, 8.0, 16.0);//set up first hospital with 10 daily capacity, open at 8am, close at 16pm
-  hospital* hospital_1 = new hospital(1, 5, 9, 16.5);////set up second hospital with 5 daily capacity, open at 9am, close at 16:30pm
+  hospital* hospital_0 = new hospital(0, 20, 8.0, 16.0);//set up first hospital with 20 daily capacity, open at 8am, close at 16pm
+  hospital* hospital_1 = new hospital(1, 16, 9, 16.5);////set up second hospital with 16 daily capacity, open at 9am, close at 16:30pm
   hospital* hospital_2 = new hospital(2, 15, 8.0, 17.0 );//set up third hospital with 15 daily capacity, open at 8am, close at 17pm
   vector<hospital*> hospital_list;
   hospital_list.push_back(hospital_0);
@@ -46,11 +48,11 @@ int main(){
   string endmark="end of half day";//the string that marks end of halfday input
 
 getline(infile, aline);//first skip the first line, which is the table head
-while (getline(infile, aline)){
-  
+while (getline(infile, aline) ){
+x++;
 if(aline.find(endmark)!=0  ){//if a endmark string is not found at the start of aline, the line contain register information
   person<int>* a_patient = new person<int>(aline);//create a tempary person from the input file line
-  int local_index=a_patient.local_id;
+  int local_index=a_patient->local_id;
   (*(localqueues[local_index])).pushback(a_patient);//push that person's adress into the local queue
 }
   
@@ -58,9 +60,9 @@ if(aline.find(endmark)!=0  ){//if a endmark string is not found at the start of 
 else{//if a endmark string is found at the start of aline, the program has already finished reading halfday information 
   halfday++;
   hour+=12.0;
-  for(int k=0; k<a_reportlist.size(); k++){
-    if(a_reportlist[k]->p_appoint->is_appointment_passed(hour)==true){
-     a_reportlist[k]->status=3; //check all people in report list, if that person's appointment has passed, mark it as status 3 
+  for(int k=0; k<a_reportlist.rl.size(); k++){
+    if((a_reportlist.rl)[k]->p_appoint->is_appointment_passed(hour)==true){
+     (a_reportlist.rl)[k]->status=3; //check all people in report list, if that person's appointment has passed, mark it as status 3 
     }
   }
 
@@ -73,7 +75,7 @@ else{//if a endmark string is found at the start of aline, the program has alrea
     }
     else{//if that person is already in the report list
    
-    old_person_ptr = a_reportlist.exist(temp_person);
+    person<int>* old_person_ptr = a_reportlist.exist(temp_person);
     if(old_person_ptr->status == 1){//if that person's status is 1, it means it is still in the heap
       if(temp_person->is_update(old_person_ptr)==true){// if this is an update 
       a_reportlist.push_old(1,temp_person);//update the information in the reportlist and change status to be in the fibonacci heap
@@ -117,9 +119,9 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   
   if(halfday%2 == 0){
   day++;
-  for(int j=0; j<fib_h.getnum()/2; j++){
+  for(int j=0; j<fibo_h.getnum()/2; j++){
   // extract the half number of people with min key from the fibonacci heap everday
-  person<int>* temp_person = fib_h.delete_min();
+  person<int>* temp_person = fibo_h.delete_min();
   appointment* a_appointment= new appointment(temp_person, day, hospital_list);
   a_appointment->make_appointment();
   int hos_id=a_appointment->hospital_id;
@@ -129,18 +131,18 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   }
   if(halfday%14==0){
    week++;
-   Weekyreport tem_weeklyreport(a_reportlist.rl, hour);
-   tem_weeklyreport.save();//generate the three weekly report 
-   tem_weeklyreport.sort();//and sort them according to the user's preference
+   Weeklyreport tem_weeklyreport(a_reportlist.rl, hour);
+   tem_weeklyreport.Save();//generate the three weekly report 
+   tem_weeklyreport.Sort();//and sort them according to the user's preference
   }
   if(halfday%56==0){
   month++;
   Monthlyreport tem_monthlyreport(a_reportlist.rl, hour);
-  tem_monthlyreport.save();//generate the monthly report
+  tem_monthlyreport.Save();//generate the monthly report
   }//increment the time relavent counters and output weekly and monthly report
  }//else 半天结束
 
-}
+}//所有行读取结束
 
   infile.close();
 return 0;
