@@ -79,52 +79,49 @@ void Weeklyreport::Sort()
 		cin >> select;
 		for (int i = 0; i < getlength(rl); i++)
 		{
-			int Max = i; //声明最小值 或 最大值下标
+			int Min = i; //声明最小值 或 最大值下标
 			for (int j = i + 1; j < getlength(rl); j++)
 			{
 				if (select == 1) //升序
 				{
-					if (rl[Max]->name > rl[j]->name)
+					if (rl[Min]->name > rl[j]->name)
 					{
-						Max = j;
+						Min = j;
 					}
             	}
                 
 				else if (select == 2) //升序
 				{
-					if (rl[Max]->prof > rl[j]->prof)
+					if (rl[Min]->prof > rl[j]->prof)
 					{
-						Max = j;
+						Min = j;
 					}
             	} 
             
-				if (select == 3) //升序
+				else if (select == 3) //升序
 				{
-					if (rl[Max]->risk > rl[j]->risk)
+					if (rl[Min]->risk > rl[j]->risk)
 					{
-						Max = j;
+						Min = j;
 					}
             	}
             }
 
 			//判断一开始认定 最小值或最大值 是不是 计算的最小值或最大值，如果不是 交换数据
-			if (i != Max)
+			if (i != Min)
 			{
-				vector<person<int>*> temp;
-                temp[1] = rl[i];
-				rl[i] = rl[Max];
-				rl[Max] = temp[1];
+				swap(rl[i], rl[Min]);
 			}
 			
 		}
 
-		cout << "排序成功！请查看文件 " << endl;
+		cout << "排序成功！请查看文件" << endl;
 		this->Save(); //排序后结果保存到文件中
 			
 }
 
 int Monthlyreport::getlength(vector<person<int>*> report_list){
-    int length=report_list.capacity();
+    int length=report_list.size();
     return length;
 }
 
