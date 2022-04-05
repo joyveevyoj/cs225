@@ -194,8 +194,9 @@ private:
 class appointment
 {
 public:
-  appointment(person<int>* a_patient, int date_out_of_queue);
+  appointment(person<int>* a_patient, int date_out_of_queue, vector<hospital*> a_hospital_list);
   //virtual ~appointment();
+  vector<hospital*> hospitals;
   void make_appointment();
   void appointment_withdraw();
   void pretty_print();
