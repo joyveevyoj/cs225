@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
+#include <cmath>
 using namespace std;
 
 
@@ -179,8 +180,8 @@ template<class T>person<T>::person(string tableline)
     string format_time = separate_str[9];
     int month = atoi(format_time.substr(5,1).c_str()) - 1;
     int day = atoi(format_time.substr(7,1).c_str()) - 1;
-    int intHour = atoi(format_time.substr(9,1).c_str());
-    double Minute = atof(format_time.substr(11,2).c_str());
+    int intHour = atoi(format_time.substr(9,2).c_str());
+    double Minute = atof(format_time.substr(12,2).c_str());
     double Hour = Minute / 60 + intHour + day * 24 + month * 28 * 24;
     Time = new double[3];
     Time[0] = Hour;
@@ -202,10 +203,8 @@ template<class T>person<T>::person(string tableline)
     {
         hospital_id[i] = atoi(separate_str[13].substr(i,1).c_str());
     }
-
-
     //Set other necessary information
-    //...
+    status = 0; //Status initialized to 0
 
     //Set key
     set_key();
@@ -310,10 +309,9 @@ template<class T>void person<T>::random_generate(int seed)
     risk_id = index;
 
     //Create Time
-    Time = new double[3];
+    Time = new double[2];
     Time[0] = rand() % 2016 + 0.1 * (rand() % 10);//2016时暂不考虑  
-    Time[1] = -1;
-    Time[2] = -1;   //-1表示不知道目前appointment time和treatment time为什么时候
+    Time[1] = -1;//-1表示不知道目前appointment time为什么时候
 
     //Create Withdraw and priority letter;
     withdraw = false;
@@ -443,8 +441,8 @@ template<class T> double* person<T>::show_hour()
 }
 template<class T> int* person<T>::show_day()
 {
-    int* Day = new int[3];
-    for(int i = 0;i < 3; i++)
+    int* Day = new int[2];
+    for(int i = 0;i < 2; i++)
     {
         if(((int)this->Time[i]) == -1){
             Day[i] = -1;
@@ -456,8 +454,8 @@ template<class T> int* person<T>::show_day()
 }
 template<class T>int* person<T>::show_half_day()
 {
-    int* half_day = new int[3];
-    for(int i = 0; i < 3;i++)
+    int* half_day = new int[2];
+    for(int i = 0; i < 2;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -470,8 +468,8 @@ template<class T>int* person<T>::show_half_day()
 }
 template<class T> int* person<T>::show_week()
 {
-    int* Week = new int[3];
-    for(int i = 0; i < 3; i++)
+    int* Week = new int[2];
+    for(int i = 0; i < 2; i++)
     {
         if(((int)this->Time[i]) == -1){
             Week[i] = -1;
@@ -484,8 +482,8 @@ template<class T> int* person<T>::show_week()
 
 template<class T> int* person<T>::show_month()
 {
-    int* Month = new int[3];
-    for(int i = 0; i < 3;i++)
+    int* Month = new int[2];
+    for(int i = 0; i < 2;i++)
     {
         if(((int)this->Time[i]) == -1){
             Month[i] = -1;
@@ -498,8 +496,8 @@ template<class T> int* person<T>::show_month()
 
 template<class T>int* person<T>::show_intHour()
 {
-    int* intHour = new int[3];
-    for(int i = 0; i < 3;i++)
+    int* intHour = new int[2];
+    for(int i = 0; i < 2;i++)
     {
         if(((int)Time[i]) == -1)
         {
@@ -513,11 +511,11 @@ template<class T>int* person<T>::show_intHour()
 }
 template<class T>string* person<T>::show_format_time()
 {
-    int* Month = new int[3];
-    int* Day = new int[3];
-    double* Hour = new double[3];
-    int* Minute = new int[3];
-    int* intHour = new int[3];
+    int* Month = new int[2];
+    int* Day = new int[2];
+    double* Hour = new double[2];
+    int* Minute = new int[2];
+    int* intHour = new int[2];
     string* format_time = new string[3];
 
     //Set month,day,hour,minute
@@ -527,7 +525,7 @@ template<class T>string* person<T>::show_format_time()
     intHour = this->show_intHour();
 
     //修正double计算造成的时间不准确
-     for(int i = 0; i < 3;i++)
+     for(int i = 0; i < 2;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -546,18 +544,26 @@ template<class T>string* person<T>::show_format_time()
         if(abs(dif - 0.8) < 0.001) {Minute[i] = 48;}
         if(abs(dif - 0.9) < 0.001) {Minute[i] = 54;}
     }
-    for(int i = 0; i < 3;i++)
+    for(int i = 0; i < 2;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
             format_time[i] = "N/A";
             continue;
         }
+        format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " ";
+        //standardize hour
+        if((intHour[i] % 24) < 10)
+            format_time[i] = format_time[i] + "0" + to_string(intHour[i] % 24) + ":";
+        else
+            format_time[i] = format_time[i] + to_string(intHour[i] % 24) + ":";
+
+        //standardize minute;
         if(Minute[i] != 0)
-        format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " " + to_string(intHour[i] % 24 ) + ":" + to_string(Minute[i]);
+            format_time[i] = format_time[i] + to_string(Minute[i]);
         //Format: 2022-3-27 19:22
         if(Minute[i] == 0)
-        format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " " + to_string(intHour[i] % 24 ) + ":" + to_string(Minute[i]) + to_string(Minute[i]);
+            format_time[i] = format_time[i] + to_string(Minute[i]) + to_string(Minute[i]);
     }
     return format_time;
 }
@@ -576,14 +582,19 @@ template<class T> bool person<T>::is_withdraw()
 }
 template<class T> void person<T>::set_appointment(appointment* r_appoint)
 {
-    return;
+    p_appoint = r_appoint;
+    Time[1] = r_appoint->the_time;
 }
+
 template<class T>void person<T>::punish()
 {
-    
+    this->Time[0] += 14 * 24;
+    this->set_key();    
 }
 template<class T>void person<T>::display_all()
 {
+    cout << endl;
+    cout << "--------------------------" << endl;
     cout << "----Personal Information----" << endl;
     cout << "ID: " << id << endl;
     cout << "Name: " << name << endl;
@@ -609,6 +620,7 @@ template<class T>void person<T>::display_all()
     if(hosp_num == 3)
         cout << hospital_id[0] << " " << hospital_id[1] << " " << hospital_id[2] << endl;
     cout << "----Further Information----" << endl;
+    cout << "Status: " << this->status << endl;
     cout << "Fibonacci key: " << this->return_key() << endl;
     cout << "Readable key: " << 117620161 - this->return_key() << endl;
     cout << "Registration Total Hour: " << this->show_hour()[0] << endl;
@@ -616,9 +628,12 @@ template<class T>void person<T>::display_all()
     cout << "Registration Total Half Day: " << this->show_half_day()[0] << endl;
     cout << "Registration Total Week: " << this->show_week()[0] << endl;
     cout << "Registration Total Month: " << this->show_month()[0] << endl;
+    cout << "--------------------------" << endl;
+    cout << endl;
 }
 
 void TableWrite::table_open(string filename)
+
 {
     outfile.open(filename);
     if(!outfile.is_open())
@@ -694,7 +709,7 @@ void TableWrite::table_create(string filename,int num)
             outfile << this->table_line(sorted_p[p_index]) << "\n";
             p_index++;
         }
-        outfile << "End of Half day" << "\n";
+        outfile << "end of half day" << "\n";
     } 
     this->table_close();
 }
@@ -708,14 +723,12 @@ int main()
     infile.open("./registry.csv");
     string aline;
     getline(infile,aline);
-    getline(infile,aline);
-    getline(infile,aline);
-    getline(infile,aline);
-    getline(infile,aline);
-    cout << aline << endl;
-    person<int> p1(aline);
-    p1.display_all();
-
+    while(getline(infile,aline))
+    {
+        if(aline == "end of half day")
+            break;
+        person<int> p1(aline);
+        p1.display_all();
+    }
     infile.close();
-
 }
