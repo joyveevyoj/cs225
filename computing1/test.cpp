@@ -2,15 +2,14 @@
 #include <iostream>
 #include<vector>
 #include "head.h"
-#include "fstream"
+#include <fstream>
 #include "cassert"
 #include <string>
-
+#include <cstring>
+#include <stdlib.h>
+#include <time.h>
+#include <cmath>
 using namespace std;
-
-TableWrite a_table;
-int person_num;
-a_table.table_create("input.csv", person_num);//create an input file
 
 int main(){
   int month=0;
@@ -19,9 +18,9 @@ int main(){
   int halfday=0; 
   double hour=0;//initialize all the parameters that represents time as zero
 
-  fifo<person<int>*>* localqueue_0 = new fifo<person<int>*>* localqueue_0;
-  fifo<person<int>*>* localqueue_1 = new fifo<person<int>*>* localqueue_0;
-  fifo<person<int>*>* localqueue_2 = new fifo<person<int>*>* localqueue_0;//set up three empty local queues;
+  fifo<person<int>*>* localqueue_0 = new fifo<person<int>*> ;
+  fifo<person<int>*>* localqueue_1 = new fifo<person<int>*> ;
+  fifo<person<int>*>* localqueue_2 = new fifo<person<int>*> ;//set up three empty local queues;
   vector<fifo<person<int>*>*> localqueues;
   localqueues.push_back(localqueue_0);
   localqueues.push_back(localqueue_1);
@@ -46,7 +45,7 @@ int main(){
   string aline;
   string endmark="end of half day";//the string that marks end of halfday input
 
-if(getline(infile, aline)==false){return 0;}//first skip the first line, which is the table head
+getline(infile, aline);//first skip the first line, which is the table head
 while (getline(infile, aline)){
   
 if(aline.find(endmark)!=0  ){//if a endmark string is not found at the start of aline, the line contain register information
