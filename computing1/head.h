@@ -22,8 +22,6 @@ public:
     T front(void);
     void pushback(T value);
     T popfront();
-
-
 private:
     int maxsize, minsize;
     int first, last;
@@ -31,8 +29,6 @@ private:
     T* reprarray;
     void allocate(void);
     void deallocate(void);
-    
-
 };
 
  
@@ -67,6 +63,7 @@ public:
     int* hospital_id;    //Array with index for the hospital，即hopsital's ranking list 
     int hosp_num;   //Initailized when the person is created
     int status;
+    appointment* p_appoint;
 private:
     bool letter;    //true if there is letter for ddl
     int risk_id;
@@ -82,14 +79,13 @@ private:
     string Wechat;
     string email;
     bool withdraw;  //true if withdraw
-    appointment* p_appoint;
-    double* Time; //表示时间的数组，0为registeration，1为appointment， 2为treatment
-                //0在初始化设置，1,2在创建时初始化为-1,具体的1和2时间应该由set_appoitment写入
+    double* Time; //表示时间的数组，0为registeration，1为appointment,
+                //0在初始化设置，1在创建时初始化为-1,具体的1时间应该由set_appoitment写入
     T key;
 
 };
 
-class TableWrite  //用于写表格文件
+class TableWrite
 {
 public:
     void table_create(string filename,int num); //num:创建的人的个数,
@@ -100,6 +96,7 @@ private:
     void table_open(string filename);
     void table_close();
 };
+
 
 template<class T> class Fb_heap
 {
@@ -118,7 +115,7 @@ private :
     };
 private :
     void listadd(Fb_node * &r, Fb_node * ptr);// add node ptr to the right of node r
-    int Dn() {return (log2(numnodes) + 1);} 
+    //int Dn() {return (log2(numnodes) + 1);} 
     void deleteln(Fb_node *p) ; //delete the node in list
     void linkheap(Fb_node * p1, Fb_node * p2); //link p1 to the right of p2
     void cutheap(Fb_node * p1, Fb_node * p2) ;
@@ -141,18 +138,18 @@ public:
 class appointment
 {
 public:
-  appointment(person<int>* a_patient, int date_out_of_queue,vector<hospital*> a_hospital_list);
+  appointment(person<int>* a_patient, int date_out_of_queue);
   //virtual ~appointment();
   void make_appointment();
+  void appointment_withdraw();
   void pretty_print();
-  bool is_appointment_passed(double current_hour);
+  bool is_appointment_passed();
   int hospital_id;
   person<int>* patient;
-  vector<hospital*> hospitals;
+  double the_time;
+  int date;
     
 private:
-  int date;
-  double time;
 };
 
 class hospital
@@ -165,8 +162,7 @@ public:
   int id;//the hospital's unique id number, which marks its position in the hospital list.
   vector<appointment*> daily_appointment_list;
   void add_to_applist(appointment* new_app);
-  void withdraw_app(appointment* w_app);//需要写，将appointment 从vector里面删除， 并且将那个人的appointment 重新设为 NULL
-  void printapp(int h_date);
+  void printapp();
   int daily_remaining_capacity[100];
 private:
   int daily_capacity;
@@ -248,8 +244,6 @@ private:
 
     vector<person<int>*> rl;
 };
-
-
 
 
 #endif
