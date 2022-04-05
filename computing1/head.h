@@ -200,7 +200,7 @@ public:
   void make_appointment();
   void appointment_withdraw();
   void pretty_print();
-  bool is_appointment_passed();
+  bool is_appointment_passed(double current_hour);
   int hospital_id;
   person<int>* patient;
   double the_time;
