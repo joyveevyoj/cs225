@@ -39,46 +39,35 @@ private:
 template <class T>class person
 {
 public:
-    person();       //If no argument, create one
-    person(string tableline);   //Create a person from local registry,需要计算keyvalue
+    friend class TableWrite;
+    friend class Weeklyreport;
+    friend class Monthlyreport;
+    person();       //If no argument, create one,key is set as well
+    person(string tableline);   //Create a person from local registry
     void random_generate(int seed); //Used to put random attributes into a person
-    void set_key();
+    void set_key(); 
     T return_key();
     void update_status(int status_number);
-    // string show_name();
-    // int show_prof();
-    // int show_age();
-    // int show_risk(); //对重要的类来说这些都可以直接友元访问，若其他情况下需要再添加所需函数即可
-    
+    string show_id();
     double* show_hour();
+    int* show_intHour();
     int* show_day();
+    int* show_half_day();
     int* show_week();
     int* show_month();  //从零开始的统一时间
     string* show_format_time();
-    
-    bool is_update(person<int>* oldper); //check whether this is an update需要写
-    bool is_newwithdraw(person<int>* oldper);//check whether this is a new withdraw需要写
-    //可以大概这样写
-    /* template<class T> bool person::is_update(person<int>* oldper){
-      if (withdraw == oldper->is_withdraw()){return true;}
-      else{return false;}
-      }
-    teplate<class T> bool person::is_newwithdraw(person<int>* oldper){
-      if (withdraw == true && oldper->is_withdraw()){return true;}
-      else{return false;}
-    }*/
-    bool is_withdraw();//是不是还没写，是return withdraw 吗
-    bool is_appointed();//可能不需要写，appointment 是NULL 就代表未appointment,如果要保留在set_appointment 里set此bool
-    void update_appointed();//可能重复了(就是set_appointment吧，reportlist 写了 set_appointment
-    int local_id;
-    int status;
-    int hosp_num;//初始化的时候别忘，否则make appointment 会无限死循环
-    vector<int> hospital_ranking_list;//the hospital's  ranking list with hospital id as element
-    void set_appointment(appointment* r_appoint);//需要写
-    void punish();//需要写
+    bool is_update(person<int>* oldper); //check whether this is an update
+    bool is_newwithdraw(person<int>* oldper);//check whether this is a new withdraw
+    bool is_withdraw(); //return withdraw
+    void set_appointment(appointment* r_appoint);    //Not written yet
+    void punish();   //Not written yet
+    void display_all(); //Display all information of this person
 
+    int local_id;   
+    int* hospital_id;    //Array with index for the hospital，即hopsital's ranking list 
+    int hosp_num;   //Initailized when the person is created
+    int status;
 private:
-    bool initial_register;  //true if register for the first time//是否就是status,不需要了
     bool letter;    //true if there is letter for ddl
     int risk_id;
     string risk;   //0,1,2,3
@@ -86,20 +75,30 @@ private:
     string prof;    //String name for profession
     int age_id;
     string age;    //0,1,2,3,4,5,6, the larger, the higher priority
-    int local_registry_id;  //Which Local registry this guy is in
-    bool withdraw;  //true if withdraw
-    bool appointed; //True if apppointment is made//可能不需要写，appointment 是NULL 就代表未appointment
-    
-    double* Time; //表示时间的数组，0为registeration，1为appointment， 2为treatment
-                  //0在初始化的时候写入，1，2在setappointment 函数里写入？还是得由主函数写入
     string id;
     string name;
     string address;
     string phone;
     string Wechat;
     string email;
+    bool withdraw;  //true if withdraw
+    appointment* p_appoint;
+    double* Time; //表示时间的数组，0为registeration，1为appointment， 2为treatment
+                //0在初始化设置，1,2在创建时初始化为-1,具体的1和2时间应该由set_appoitment写入
     T key;
-    appointment* p_appoint;//需要初始化为NULL
+
+};
+
+class TableWrite  //用于写表格文件
+{
+public:
+    void table_create(string filename,int num); //num:创建的人的个数,
+    string table_line(person<int>& p); //给每一个人创造一行
+
+private:
+    ofstream outfile;
+    void table_open(string filename);
+    void table_close();
 };
 
 template<class T> class Fb_heap
