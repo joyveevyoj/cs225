@@ -26,11 +26,11 @@ void reportlist::push_old(int r_status, person<int>* patient){
 
 void reportlist::push_appoi(int r_status, appointment* r_appointment){
     person<int>*  apperson= exist(r_appointment->patient) ;
-    if(apperson==nullptr){
+    if(apperson==NULL){
         return ; //if not find this person
     }
     apperson->set_appointment(r_appointment); //需要加函数
-    apperson->status=r_status ;
+    apperson->status= r_status;
 }
 
 person<int>* reportlist::exist(person<int>* patient){
@@ -40,7 +40,7 @@ person<int>* reportlist::exist(person<int>* patient){
             return rl[i] ;   //if find this patient in the reportlist, then return person's addr
         }
     }
-    return nullptr ; //if not find , return null
+    return NULL ; //if not find , return null
 
 }
 
