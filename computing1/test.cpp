@@ -8,6 +8,10 @@
 
 using namespace std;
 
+TableWrite a_table;
+int person_num;
+a_table.table_create("input.csv", person_num);//create an input file
+
 int main(){
   int month=0;
   int week=0;
@@ -15,39 +19,37 @@ int main(){
   int halfday=0; 
   double hour=0;//initialize all the parameters that represents time as zero
 
-
-  
   fifo<person<int>*>* localqueue_0 = new fifo<person<int>*>* localqueue_0;
   fifo<person<int>*>* localqueue_1 = new fifo<person<int>*>* localqueue_0;
   fifo<person<int>*>* localqueue_2 = new fifo<person<int>*>* localqueue_0;//set up three empty local queues;
   vector<fifo<person<int>*>*> localqueues;
-  localqueues.pushback(localqueue_0);
-  localqueues.pushback(localqueue_1);
-  localqueues.pushback(localqueue_2);
+  localqueues.push_back(localqueue_0);
+  localqueues.push_back(localqueue_1);
+  localqueues.push_back(localqueue_2);
   
 
   hospital* hospital_0 = new hospital(0, 10, 8.0, 16.0);//set up first hospital with 10 daily capacity, open at 8am, close at 16pm
   hospital* hospital_1 = new hospital(1, 5, 9, 16.5);////set up second hospital with 5 daily capacity, open at 9am, close at 16:30pm
   hospital* hospital_2 = new hospital(2, 15, 8.0, 17.0 );//set up third hospital with 15 daily capacity, open at 8am, close at 17pm
   vector<hospital*> hospital_list;
-  hospital_list.pushback(hospital_0);
-  hospital_list.pushback(hospital_1);
-  hospital_list.pushback(hospital_2);//put all three hospital's pointer in a hospital list.
+  hospital_list.push_back(hospital_0);
+  hospital_list.push_back(hospital_1);
+  hospital_list.push_back(hospital_2);//put all three hospital's pointer in a hospital list.
 
   Fb_heap<int> fibo_h;//set up an empty fibonacciheap
 
   reportlist a_reportlist;//set up a report list that stores all the patient's information, and is used to generate report
  
   ifstream infile;
-  infile.open("input.txt");//connect  stream with inputfile  
+  infile.open("input.csv");   //connect  stream with inputfile  
 	assert(infile.is_open());   //if fail, output error and exit the programm
   string aline;
   string endmark="end of half day";//the string that marks end of halfday input
 
-
+if(getline(infile, aline)==false){return 0;}//first skip the first line, which is the table head
 while (getline(infile, aline)){
   
-if(aline.find(endmark)!=0){//if a endmark string is not found at the start of aline, the line contain register information
+if(aline.find(endmark)!=0  ){//if a endmark string is not found at the start of aline, the line contain register information
   person<int>* a_patient = new person<int>(aline);//create a tempary person from the input file line
   int local_index=a_patient.local_id;
   (*(localqueues[local_index])).pushback(a_patient);//push that person's adress into the local queue
@@ -58,7 +60,7 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   halfday++;
   hour+=12.0;
   for(int k=0; k<a_reportlist.size(); k++){
-    if(a_reportlist[k]->p_appointment->is_appointment_passed(hour)==true){
+    if(a_reportlist[k]->p_appoint->is_appointment_passed(hour)==true){
      a_reportlist[k]->status=3; //check all people in report list, if that person's appointment has passed, mark it as status 3 
     }
   }
@@ -79,7 +81,7 @@ else{//if a endmark string is found at the start of aline, the program has alrea
       fibo_h.update(temp_person, old_person_ptr );//update the fibonacci heap with the updated old person accordingly
      }
       if(temp_person->is_newwithdraw(old_person_ptr)==true){
-      fibo_h.delete(old_person_ptr);//if that person withdraws, delete him from fibonacci heap
+      fibo_h.remove(old_person_ptr);//if that person withdraws, delete him from fibonacci heap
       a_reportlist.push_old(5,temp_person);//update the information in the report list and change status to be after treated
       }
     }
@@ -124,7 +126,7 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   a_appointment->make_appointment();
   int hos_id=a_appointment->hospital_id;
   hospital_list[hos_id]->add_to_applist(a_appointment);//make appointment and add them to the fibonacci heap
-  a_reportlist.push_appoi(2,a_appointment);
+  a_reportlist.push_appoi(2,a_appointment);//update that person's status and set his appointment
   }
   }
   if(halfday%14==0){
