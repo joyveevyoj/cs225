@@ -3,6 +3,8 @@
 #include <iostream>
 using namespace std;
 #include "head.h"
+#include <string>
+#include <cstring>
 
 
 hospital::hospital(int idnum, int capacity, double o_time, double c_time)
@@ -25,10 +27,10 @@ else{return false;}
 
 //this function returns the next available time for the patient, and decrease the remaining capacity
 double hospital::get_time_appointed(int h_date){
-    double time;
-    time=open_time+((double)(daily_capacity-daily_remaining_capacity[h_date]))*treatment_time;
+    double atime;
+    atime=open_time+((double)(daily_capacity-daily_remaining_capacity[h_date]))*treatment_time;
     daily_remaining_capacity[h_date]--; //decrease the remaining capacity when one time is appointed
-    return time;
+    return atime;
   }
 
 //this function add the new appointment to the hospital's apppointment list
@@ -37,13 +39,20 @@ daily_appointment_list.push_back(new_app);
 return;
   }
 
-void hospital::printapp(int date){
-  
+void hospital::printapp(){
+  for int(i=0; i<daily_appointment_listsize();i++){
+  daily_appointment_list[i]->pretty_print();
+  }
+  return;
 }
-void hospital::withdraw_app(appointment* w_app){//需要写，将appointment 从vector里面删除， 并且将那个人的appointment 重新设为 NULL
-
-
-
+void hospital::withdraw_app(appointment* w_app){
+for (vector<appointment*>::iterator iter=daily_appointment_list.begin();iter!=daily_appointment_list.end();iter++){
+  if(*iter==w_app){
+    daily_appointment_list.erase(iter);
+    break;
+  }
+}//find that appointment and delete it from the appointment list
+w_app->patient->set_appointment(NULL);//set that person's appointment pointer to be null
 
 }
 
@@ -64,7 +73,7 @@ while (i< patient->hosp_num && (hospitals[hospital_id])->is_hospital_available(d
 }
 if(i<patient->hosp_num){
     hospital_id=patient->hospital_ranking_list[i];
-    time=(hospitals[hospital_id])->get_time_appointed(date);}
+    the_time=(hospitals[hospital_id])->get_time_appointed(date);}
 else{date++;
 }
 }
@@ -72,9 +81,10 @@ return;
 }
 
 void appointment::pretty_print(){
+     cout<<"patient id is:"<<patient->show_id()<<"\n";
      cout<<"hospital id is: "<<hospital_id<<"\n";
      cout<<"date is: "<<date<<"\n";
-     cout<<"time is: "<<time<<"\n";
+     cout<<"time is: "<<the_time<<"\n";
   
 }
 
