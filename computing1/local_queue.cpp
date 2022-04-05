@@ -1,7 +1,8 @@
 // Data structure for local_queue
 
 #include <iostream>
-#include "local_queue.h"
+#include <fstream>
+#include "head.h"
 #include <string>
 #include <cstring>
 #include <stdlib.h>
@@ -9,6 +10,10 @@
 #include <vector>
 using namespace std;
 
+
+string prof_set[8] = {"Teacher","Actor","Farmer","Businessman","Journalist","Student","Engineer","Programmer"};
+string age_set[7] = {"Children","Adolescent","Young Adult","Adult","Senior","Elderly Person","Old Person"};
+string risk_set[4] ={"No risk","Low risk","Medium risk","High risk"};
 template<class T> fifo<T>::fifo(int size)
 {
     maxsize = size;
@@ -125,22 +130,105 @@ template<class T> person<T>::person()
 {
     return;
 }
+template<class T>person<T>::person(string tableline)
+{
+    //Separate the string
+    int index = 0;  //逗号后的第一个位置
+    int next_index; //逗号的2位置
+    string separate_str[14];
+    for(int i = 0; i < 14;i++)
+    {
+        next_index = tableline.find(",",index);
+        separate_str[i] = tableline.substr(index,next_index-index);
+        index = next_index + 1;
+    }
+    //Assign separate string to parameter of the person
+    id = separate_str[0];
+    name = separate_str[1];
+    address = separate_str[2];
+    phone = separate_str[3];
+    Wechat = separate_str[4];
+    email = separate_str[5];
+    prof = separate_str[6];
+    for(int i = 0; i < 8;i++)
+    {
+        if(prof == prof_set[i])
+        {
+            prof_id = i;
+            break;
+        }
+    }
+    age = separate_str[7];
+    for(int i = 0; i < 7;i++)
+    {
+        if(age == age_set[i])
+        {
+            age_id = i;
+            break;
+        }
+    }
+    risk = separate_str[8];
+    for(int i = 0; i < 4;i++)
+    {
+        if(risk == risk_set[i])
+        {
+            risk_id = i;
+            break;
+        }
+    }
+    string format_time = separate_str[9];
+    int month = atoi(format_time.substr(5,1).c_str()) - 1;
+    int day = atoi(format_time.substr(7,1).c_str()) - 1;
+    int intHour = atoi(format_time.substr(9,1).c_str());
+    double Minute = atof(format_time.substr(11,2).c_str());
+    double Hour = Minute / 60 + intHour + day * 24 + month * 28 * 24;
+    Time = new double[3];
+    Time[0] = Hour;
+    Time[1] = -1;
+    Time[2] = -1;
 
-template<class T>void person<T>::random_generate(int seed, int week)
+    if(separate_str[10] == "0")
+        withdraw = false;
+    else
+        withdraw = true;
+    if(separate_str[11] == "0")
+        letter = false;
+    else
+        letter = true;
+    local_id = atoi(separate_str[12].c_str());
+    hosp_num = separate_str[13].length();
+    hospital_id = new int[hosp_num];
+    for(int i = 0; i < hosp_num;i++)
+    {
+        hospital_id[i] = atoi(separate_str[13].substr(i,1).c_str());
+    }
+
+
+    //Set other necessary information
+    //...
+
+    //Set key
+    set_key();
+}
+template<class T>void person<T>::random_generate(int seed)
 {
     srand((unsigned)((time(NULL)) * (seed * seed)));
-    string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    string alphabet = "abcdefghijklmnopqrstuvwxyz";
+    string Upper_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     string integer_set = "0123456789";
     int i;//index for loop
     int index;//index for alphabet,interger_set and other vectors;
     //Create random name
-    int namelength = rand() % 5 + 2;
+    int namelength = rand() % 5 + 3;
     name.resize(namelength);
     for(i = 0; i < namelength;i++)
     {
         index = rand() % 26;
         name[i] = alphabet[index];
     }
+    index = rand() % 26;
+    name = Upper_alphabet[index] + name;
+
 
     //Create id
     int idlength = 10;
@@ -198,44 +286,121 @@ template<class T>void person<T>::random_generate(int seed, int week)
     email = email_prefix + email_suffix_set[index];
     
     //Create prof
-    vector<string>prof_set;
-    //Profession priority increase from this order
-    prof_set.push_back("Teacher"); prof_set.push_back("Actor"); prof_set.push_back("Farmer"); prof_set.push_back("Businessman");
-    prof_set.push_back("Journalist"); prof_set.push_back("Student"); prof_set.push_back("Engineer"); prof_set.push_back("Programmer");
+    // vector<string>prof_set;
+    // //Profession priority increase from this order
+    // prof_set.push_back("Teacher"); prof_set.push_back("Actor"); prof_set.push_back("Farmer"); prof_set.push_back("Businessman");
+    // prof_set.push_back("Journalist"); prof_set.push_back("Student"); prof_set.push_back("Engineer"); prof_set.push_back("Programmer");
     index = rand() % 8;
     prof = prof_set[index];
     prof_id = index;
 
     //Create age;
-    vector<string>age_set;
-    age_set.push_back("Children"); age_set.push_back("Adolescent"); age_set.push_back("Young Adult"); age_set.push_back("Adult");
-    age_set.push_back("Senior"); age_set.push_back("Elderly Person"); age_set.push_back("Old Person");
+    // vector<string>age_set;
+    // age_set.push_back("Children"); age_set.push_back("Adolescent"); age_set.push_back("Young Adult"); age_set.push_back("Adult");
+    // age_set.push_back("Senior"); age_set.push_back("Elderly Person"); age_set.push_back("Old Person");
     index = rand() % 7;
     age = age_set[index];
     age_id = index;
 
     //Create risk
-    vector<string>risk_set;
-    risk_set.push_back("No risk"); risk_set.push_back("Low risk"); risk_set.push_back("Medium risk"); risk_set.push_back("High risk");
+    // vector<string>risk_set;
+    // risk_set.push_back("No risk"); risk_set.push_back("Low risk"); risk_set.push_back("Medium risk"); risk_set.push_back("High risk");
     index = rand() % 4;
     risk = risk_set[index];
     risk_id = index;
 
     //Create Time
     Time = new double[3];
-    Time[0] = (week * 168) + (rand() % 168) + 0.1 * (rand() % 10);//2016时暂不考虑  
+    Time[0] = rand() % 2016 + 0.1 * (rand() % 10);//2016时暂不考虑  
     Time[1] = -1;
     Time[2] = -1;   //-1表示不知道目前appointment time和treatment time为什么时候
-
 
     //Create Withdraw and priority letter;
     withdraw = false;
     letter = false;
+
+    //Create local registry id and hopsital id
+    local_id = rand() % 3;
+
+    hosp_num = rand() % 3 + 1;
+    hospital_id = new int[hosp_num];
+    if(hosp_num == 1)
+    {
+        hospital_id[0] = rand() % 3;
+    }
+    if(hosp_num == 2)
+    {
+        //Six cases
+        int random_id_set[6] ={1,2,10,12,20,21};
+        int chosen_id = random_id_set[rand() % 6];
+        hospital_id[0] = chosen_id / 10;
+        hospital_id[1] = chosen_id % 10;
+    }
+    if(hosp_num == 3)
+    {
+        for(i = 0; i < hosp_num; i++)
+        {
+            hospital_id[i] = i;
+        }
+        //Random swap
+        for(i = 0; i < hosp_num; i++)
+        {
+            int rand_i = rand() % 3;
+            int temp = hospital_id[i];
+            hospital_id[i] = hospital_id[rand_i];
+            hospital_id[rand_i] = temp;
+        }
+    }
+
 }
-// template<class T>string person<T>::show_id()
-// {
-//     return this->id;
-// }
+template<class T> void person<T>::set_key()
+{
+    //register time priority
+    T max_key = 117620161;
+    int max_time = 20160;
+    key = (int)(max_time - Time[0] * 10);
+    
+
+    //Withdraw priority
+    if ((withdraw == true) && ((risk_id == 0) || (risk_id == 1)))
+    {
+        key += 14 * 24 * 10;
+    }
+
+    //age priority
+    key += age_id * 100000;
+    //profession priority
+    key += prof_id * 1000000;
+    //risk priority
+    if( risk_id == 0 || risk_id == 1 || risk_id == 2)
+    {
+        key += 10000000;
+    }
+    if( risk_id == 2)
+    {
+        key += 30 * 24 * 10;    //Medium risk extend one month
+    }
+    //letter priority
+    if (letter == true)
+    {
+        key += 100000000;
+    }
+    //最大转为最小
+    key = max_key - key;
+    return;
+}
+template<class T> T person<T>::return_key()
+{   
+    return key;
+}
+template<class T>void person<T>::update_status(int status_number)
+{
+    status = status_number;
+}
+template<class T>string person<T>::show_id()
+{
+    return this->id;
+}
 // template<class T>string person<T>::show_name()
 // {
 //     return this->name;
@@ -248,7 +413,6 @@ template<class T>void person<T>::random_generate(int seed, int week)
 // {
 //     return this->address;
 // }
-
 // template<class T> string person<T>::show_prof()
 // {
 //     return this->prof;
@@ -273,52 +437,47 @@ template<class T>void person<T>::random_generate(int seed, int week)
 // {
 //     return this->risk_id;
 // }
-
 template<class T> double* person<T>::show_hour()
 {
     return Time;
 }
-
 template<class T> int* person<T>::show_day()
 {
     int* Day = new int[3];
     for(int i = 0;i < 3; i++)
     {
-        if(Time[i] == -1){
+        if(((int)this->Time[i]) == -1){
             Day[i] = -1;
             continue;
         }   
-        Day[i] = (int)(Time[i] / 24);
+        Day[i] = (int)(this->Time[i] / 24);
     }
     return Day;
 }
-
 template<class T>int* person<T>::show_half_day()
 {
-    int* Day = this->show_day();
     int* half_day = new int[3];
     for(int i = 0; i < 3;i++)
     {
-        if(Time[i] == -1)
+        if(((int)this->Time[i]) == -1)
         {
             half_day[i] = -1;
             continue;
         }
-        half_day[i] = Day[i] * 2;
+        half_day[i] = (int)(this->Time[i] / 12);
     }
     return half_day;
 }
-
 template<class T> int* person<T>::show_week()
 {
     int* Week = new int[3];
     for(int i = 0; i < 3; i++)
     {
-        if(Time[i] == -1){
+        if(((int)this->Time[i]) == -1){
             Week[i] = -1;
             continue;
         }
-        Week[i] = (int)(Time[i] / (24 * 7));   
+        Week[i] = (int)(this->Time[i] / (24 * 7));   
     }
     return Week;
 }
@@ -328,16 +487,30 @@ template<class T> int* person<T>::show_month()
     int* Month = new int[3];
     for(int i = 0; i < 3;i++)
     {
-        if(Time[i] == -1){
+        if(((int)this->Time[i]) == -1){
             Month[i] = -1;
             continue;;
         }
-        Month[i] = (int)(Time[i] / (24*28));    
+        Month[i] = (int)(this->Time[i] / (24*28));    
     }
     return Month;
 }
 
+template<class T>int* person<T>::show_intHour()
+{
+    int* intHour = new int[3];
+    for(int i = 0; i < 3;i++)
+    {
+        if(((int)Time[i]) == -1)
+        {
+            intHour[i] = -1;
+            continue;
+        }
+        intHour[i] = (int) Time[i];
+    }
+    return intHour;
 
+}
 template<class T>string* person<T>::show_format_time()
 {
     int* Month = new int[3];
@@ -351,86 +524,198 @@ template<class T>string* person<T>::show_format_time()
     Month = this->show_month();
     Day = this->show_day();
     Hour = this->show_hour();
-    for(int i = 0; i < 3;i++)
+    intHour = this->show_intHour();
+
+    //修正double计算造成的时间不准确
+     for(int i = 0; i < 3;i++)
     {
-        if(Time[i] == -1)
+        if(((int)this->Time[i]) == -1)
         {
             Minute[i] = -1;
-            intHour[i] = -1;
             continue;
         }
-        intHour[i] = (int)Hour[i];
-        Minute[i] = (int) ((Hour[i] - intHour[i]) * 60);
+        double dif = Hour[i] - intHour[i];
+        if(abs(dif - 0) < 0.001) {Minute[i] = 0;}
+        if(abs(dif - 0.1) < 0.001) {Minute[i] = 6;}
+        if(abs(dif - 0.2) < 0.001) {Minute[i] = 12;}
+        if(abs(dif - 0.3) < 0.001) {Minute[i] = 18;}
+        if(abs(dif - 0.4) < 0.001) {Minute[i] = 24;}
+        if(abs(dif - 0.5) < 0.001) {Minute[i] = 30;}
+        if(abs(dif - 0.6) < 0.001) {Minute[i] = 36;}
+        if(abs(dif - 0.7) < 0.001) {Minute[i] = 42;}
+        if(abs(dif - 0.8) < 0.001) {Minute[i] = 48;}
+        if(abs(dif - 0.9) < 0.001) {Minute[i] = 54;}
     }
     for(int i = 0; i < 3;i++)
     {
-        if(Time[i] == -1)
+        if(((int)this->Time[i]) == -1)
         {
             format_time[i] = "N/A";
             continue;
         }
+        if(Minute[i] != 0)
         format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " " + to_string(intHour[i] % 24 ) + ":" + to_string(Minute[i]);
         //Format: 2022-3-27 19:22
+        if(Minute[i] == 0)
+        format_time[i] = to_string(2022) + "-" + to_string(1+Month[i]) + "-" + to_string(Day[i] % 28 + 1) + " " + to_string(intHour[i] % 24 ) + ":" + to_string(Minute[i]) + to_string(Minute[i]);
     }
     return format_time;
-
-
-
 }
-
-template<class T> void person<T>::set_key()
+template<class T>bool person<T>::is_update(person<int>* oldper)
 {
-    //525699 is the largest time in minute within a year
-    //register time priority
-    key = 525699 - calculate_time;
-
-    //Withdraw priority
-    if ((withdraw == true) && ((risk_id == 0) || (risk_id == 1)))
-    {
-        key += 14 * 24 * 60;
-    }
-
-    //risk priority
-    if( risk_id == 2)
-    {
-        key += 30 * 24 * 60;    //Medium risk extend one month
-    }
-    if( risk_id == 3)
-    {
-        //if( local_queue_id.is != true)
-        {
-            key = -1;
-            return; //if there are others in queue, set key to minimum
-        }
-    }
-
-    //age priority
-    key += age_id * 1000000;
-    //profession priority
-    key += prof_id * 10000000;
-    //letter priority
-    if (letter == true)
-    {
-        key += 100000000;
-    }
+    if (withdraw == oldper->is_withdraw()){return true;}
+    else{return false;}
+}
+template<class T> bool person<T>::is_newwithdraw(person<int>* oldper){
+      if (withdraw == true && oldper->is_withdraw()){return true;}
+      else{return false;}
+}
+template<class T> bool person<T>::is_withdraw()
+{
+    return withdraw;
+}
+template<class T> void person<T>::set_appointment(appointment* r_appoint)
+{
     return;
 }
-
-template<class T> T person<T>::return_key()
-{   
-    return key;
+template<class T>void person<T>::punish()
+{
+    
+}
+template<class T>void person<T>::display_all()
+{
+    cout << "----Personal Information----" << endl;
+    cout << "ID: " << id << endl;
+    cout << "Name: " << name << endl;
+    cout << "Address: " << address << endl;
+    cout << "Phone: " << phone << endl;
+    cout << "Wechat: " << Wechat << endl;
+    cout << "Email: " << email << endl;
+    cout << "Profession: " << prof << endl;
+    cout << "Profession ID: " << prof_id << endl;
+    cout << "Age: " << age << endl;
+    cout << "Age ID: " << age_id << endl;
+    cout << "Risk Statu: " << risk << endl;
+    cout << "Risk ID: " << risk_id << endl;
+    cout << "Registration Time: " << this->show_format_time()[0] << endl;
+    cout << "Withdraw: " << withdraw << endl;
+    cout << "Priority letter: " << letter << endl;
+    cout << "Local Registry ID: " << local_id << endl;
+    cout << "Order of Hospital: ";
+    if(hosp_num == 1)
+        cout << hospital_id[0] << endl;
+    if(hosp_num == 2)
+        cout << hospital_id[0] << " " << hospital_id[1] << endl;
+    if(hosp_num == 3)
+        cout << hospital_id[0] << " " << hospital_id[1] << " " << hospital_id[2] << endl;
+    cout << "----Further Information----" << endl;
+    cout << "Fibonacci key: " << this->return_key() << endl;
+    cout << "Readable key: " << 117620161 - this->return_key() << endl;
+    cout << "Registration Total Hour: " << this->show_hour()[0] << endl;
+    cout << "Registration Total Day: " << this->show_day()[0] << endl;
+    cout << "Registration Total Half Day: " << this->show_half_day()[0] << endl;
+    cout << "Registration Total Week: " << this->show_week()[0] << endl;
+    cout << "Registration Total Month: " << this->show_month()[0] << endl;
 }
 
-// int main()
-// {
-//     person<int> p1[10];
-//     for(int i =0; i < 10; i++)
-//     {
-//         p1[i].random_generate(i,2);
+void TableWrite::table_open(string filename)
+{
+    outfile.open(filename);
+    if(!outfile.is_open())
+    {
+        cout << "Error: Opening a file fails" << endl;
+        exit(EXIT_FAILURE);
+    }
+}
+void TableWrite::table_close()
+{
+    outfile.close();   
+}
+string TableWrite::table_line(person<int>& p)
+{
+    string line;
+    string hopsital_line = "";
+    for(int i = 0; i < p.hosp_num; i++)
+    {
+        hopsital_line = hopsital_line + to_string(p.hospital_id[i]);
+    }
+    line = p.id+","+p.name+","+p.address+","+p.phone+","+p.Wechat+","+p.email+","+p.prof+","+p.age+","+p.risk+","+p.show_format_time()[0]+","+to_string(p.withdraw)+","+to_string(p.letter)+","+to_string(p.local_id)+","+hopsital_line;
+    return line;
+}
+void TableWrite::table_create(string filename,int num)
+{
+    this->table_open(filename);
+    //第一行
+    string first_row;
+    first_row = "ID,Name,Address,Phone,WeChat,Email,Profession,Age,Risk Status,Registration Time,Withdraw,Priority Letter,Local Registry ID,Hopsital ID\n" ;
+    outfile << first_row;
+    //创造num 个人
+    person<int>* p = new person<int>[num];
+    for(int i = 0;i < num;i++)
+    {
+        p[i].random_generate(i);
+    }
 
-//     }
-//     for(int i = 0;i < 10; i++)
-//     {
-//         cout << p1[i].show_format_time()[0] << endl;
-//     }
-// }
+    //按注册时间selection sort
+    person<int> pmin = p[0]; 
+    int pmin_index = 0;
+    person<int>* sorted_p = new person<int>[num];
+
+    for(int i =0; i < num;i++)
+    {
+        //选出最小的
+        for(int j = 0; j < num - i; j++)
+        {
+            if(p[j].Time[0] < pmin.Time[0]){
+                pmin = p[j];
+                pmin_index = j;
+            }
+        }
+        //加到sorted list去
+        sorted_p[i] = pmin;
+        //把pmin从原list删除
+        for(int j = pmin_index; j < num - i - 1;j++)
+        {
+            p[j] = p[j+1];
+        }
+        //更新pmin
+        pmin = p[0];
+        pmin_index = 0;
+    }
+
+    //Every half day, print end of half day
+    int half_day_index;
+    int p_index = 0;
+    for(half_day_index = 0; half_day_index < 168; half_day_index++)
+    {
+        
+        while( (p_index < num) && (sorted_p[p_index].show_half_day()[0] == half_day_index) && (half_day_index < 168))
+        {
+            outfile << this->table_line(sorted_p[p_index]) << "\n";
+            p_index++;
+        }
+        outfile << "End of Half day" << "\n";
+    } 
+    this->table_close();
+}
+
+int main()
+{
+    TableWrite t1;
+    t1.table_create("./registry.csv",1000);
+
+    ifstream infile;
+    infile.open("./registry.csv");
+    string aline;
+    getline(infile,aline);
+    getline(infile,aline);
+    getline(infile,aline);
+    getline(infile,aline);
+    getline(infile,aline);
+    cout << aline << endl;
+    person<int> p1(aline);
+    p1.display_all();
+
+    infile.close();
+
+}
