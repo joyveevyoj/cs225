@@ -149,7 +149,7 @@ public:
   double the_time;
   int date;
     
-private:
+
 };
 
 class hospital
@@ -158,7 +158,6 @@ public:
   hospital(int idnum, int capacity, double o_time, double c_time);
   bool is_hospital_available(int h_date);
   double get_time_appointed(int h_date);
-  int daily_appointment_num;
   int id;//the hospital's unique id number, which marks its position in the hospital list.
   vector<appointment*> daily_appointment_list;
   void add_to_applist(appointment* new_app);
