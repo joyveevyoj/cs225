@@ -295,6 +295,8 @@ public:
 
     int intotal_waiting_num(int a, int b);
 
+    void Save();
+
 private:
 
     vector<person<int>*> rl;
