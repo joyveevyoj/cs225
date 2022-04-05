@@ -110,12 +110,11 @@ else{//if a endmark string is found at the start of aline, the program has alrea
        a_reportlist.push_new(1,temp_person);//push that person to reportlist and change status to be in the fibonacci heap
      
      }  
-      }
-     }
-    }
-   }
-  }
- }
+      }//else
+     }//while pop未空
+    }//for i=0-3
+   
+  
   if(halfday%2 == 0){
   day++;
   for(int j=0; j<fib_h.getnum()/2; j++){
@@ -139,20 +138,10 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   Monthlyreport tem_monthlyreport(a_reportlist.rl, hour);
   tem_monthlyreport.save();//generate the monthly report
   }//increment the time relavent counters and output weekly and monthly report
-
-  infile.close();
-  return 0;
+ }//else 半天结束
 
 }
- 
- 
 
-
-
-  
-                                        
-
-
-
-
-
+  infile.close();
+return 0;
+}
