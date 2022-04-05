@@ -98,42 +98,98 @@ private:
 };
 
 
-template<class T> class Fb_heap
-{
-private :
-    struct Fb_node
-    {
-        T dataitem ;
-        struct Fb_node *parent;
-        struct Fb_node *child;
-        struct Fb_node *left;
-        struct Fb_node *right;
-        bool mark;
-        int degree;
-        Fb_node() : dataitem(0), parent(nullptr), child(nullptr), left(this), right(this), mark(false), degree(0){} ;
-        Fb_node(T _data,Fb_node* _parent,Fb_node* _child,Fb_node* _left, Fb_node* _right,bool _mark,int _degree) : dataitem(_data), parent(_parent), child(_child), left(_left), right(_right), mark(_mark), degree(_degree){} ;
-    };
-private :
-    void listadd(Fb_node * &r, Fb_node * ptr);// add node ptr to the right of node r
-    //int Dn() {return (log2(numnodes) + 1);} 
-    void deleteln(Fb_node *p) ; //delete the node in list
-    void linkheap(Fb_node * p1, Fb_node * p2); //link p1 to the right of p2
-    void cutheap(Fb_node * p1, Fb_node * p2) ;
-    void markcut(Fb_node* p);
-    Fb_node* minnode;
-    int numnodes; 
-    //Fb_node* search(Fb_node* nn,T k) ;
+template <class T>
+class Fb_node {
 public:
-    Fb_heap() : minnode(nullptr), numnodes(0) {} ;
-    void insert(person<int>* newpatient);
-    person<int>* delete_min(void);
-    void consolidate(void);
-    void decrease(Fb_node *dnode,T k);
-    void deletenode(person<int>* oldpatient) ;
-    void update(person<int>*newpatient, person<int>* oldpatient) ; //  update dataitem k into nk
+    int key;                // 关键字(键值)
+    int degree;            // 度数
+    Fb_node<T> *left;    // 左兄弟
+    Fb_node<T> *right;    // 右兄弟
+    Fb_node<T> *child;    // 第一个孩子节点
+    Fb_node<T> *parent;    // 父节点
+    bool marked;        // 是否被删除第一个孩子
+    person<int>* patient ;
+    
 
+    Fb_node(person<int>* tpatient):key(tpatient->return_key()), degree(0), marked(false),
+                     left(NULL),right(NULL),child(NULL),parent(NULL), patient(tpatient) {
+        key    = tpatient->return_key();
+        degree = 0;
+        marked = false;
+        left   = this;
+        right  = this;
+        parent = NULL;
+        child  = NULL;
+        patient = tpatient ;
+    }
 };
 
+template <class T>
+class Fb_heap {
+private:
+    int keyNum;         // 堆中节点的总数
+    int maxDegree;      // 最大度
+    Fb_node<T> *min;    // 最小节点(某个最小堆的根节点)
+    Fb_node<T> **cons;    // 最大度的内存区域
+
+public:
+    Fb_heap();
+    ~Fb_heap();
+
+    // 新建key对应的节点，并将其插入到斐波那契堆中
+    void insert(person<int>* patient);
+    // 移除斐波那契堆中的最小节点
+    person<int>* delete_min();
+    // 将斐波那契堆中键值oldkey更新为newkey
+    void update(person<int>*newpatient, person<int>* oldpatient);
+    // 删除键值为key的节点
+    void remove(person<int>* oldpatient);
+    // 斐波那契堆中是否包含键值key
+    void print();
+    // 销毁
+    void destroy();
+    int getnum(){return keyNum;};
+
+private:
+    // 将node从双链表移除
+    void removeNode(Fb_node<T> *node);
+    // 将node堆结点加入root结点之前(循环链表中)
+    void addNode(Fb_node<T> *node, Fb_node<T> *root);
+    // 将双向链表b链接到双向链表a的后面
+    void catList(Fb_node<T> *a, Fb_node<T> *b);
+    // 将节点node插入到斐波那契堆中
+    void insert(Fb_node<T> *node);
+    // 将"堆的最小结点"从根链表中移除，
+    Fb_node<T>* extractMin();
+    // 将node链接到root根结点
+    void link(Fb_node<T>* node, Fb_node<T>* root);
+    // 创建consolidate所需空间
+    void makeCons();
+    // 合并斐波那契堆的根链表中左右相同度数的树
+    void consolidate();
+    // 修改度数
+    void renewDegree(Fb_node<T> *parent, int degree);
+    // 将node从父节点parent的子链接中剥离出来，并使node成为"堆的根链表"中的一员。
+    void cut(Fb_node<T> *node, Fb_node<T> *parent);
+    // 对节点node进行"级联剪切"
+    void cascadingCut(Fb_node<T> *node) ;
+    // 将斐波那契堆中节点node的值减少为key
+    void decrease(Fb_node<T> *node, T key);
+    // 将斐波那契堆中节点node的值增加为key
+    void increase(Fb_node<T> *node, T key);
+    // 更新斐波那契堆的节点node的键值为key
+    void update(Fb_node<T> *node, T key);
+    // 在最小堆root中查找键值为key的节点
+    Fb_node<T>* search(Fb_node<T> *root, person<int>* patient);
+    // 在斐波那契堆中查找键值为key的节点
+    Fb_node<T>* search(person<int>* patient);
+    // 删除结点node
+    void remove(Fb_node<T> *node);
+    // 销毁斐波那契堆
+    void destroyNode(Fb_node<T> *node);
+    // 打印"斐波那契堆"
+    void print(Fb_node<T> *node, Fb_node<T> *prev, int direction);
+};
 
 class appointment
 {
