@@ -49,7 +49,7 @@ int main(){
 
 getline(infile, aline);//first skip the first line, which is the table head
 while (getline(infile, aline) ){
-x++;
+
 if(aline.find(endmark)!=0  ){//if a endmark string is not found at the start of aline, the line contain register information
   person<int>* a_patient = new person<int>(aline);//create a tempary person from the input file line
   int local_index=a_patient->local_id;
@@ -119,8 +119,10 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   
   if(halfday%2 == 0){
   day++;
-  for(int j=0; j<fibo_h.getnum()/2; j++){
+  int f_num=fibo_h.getnum();
+  for(int j=0; j<f_num/2; j++){
   // extract the half number of people with min key from the fibonacci heap everday
+  cout<<"j is: "<<j<<"\n";
   person<int>* temp_person = fibo_h.delete_min();
   appointment* a_appointment= new appointment(temp_person, day, hospital_list);
   a_appointment->make_appointment();
