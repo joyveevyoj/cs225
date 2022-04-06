@@ -10,12 +10,9 @@ using namespace std;
 hospital::hospital(int idnum, int capacity, double o_time, double c_time)
 :id(idnum), daily_capacity(capacity), open_time(o_time), close_time(c_time){
 for (int j=0; j<100; j++){daily_remaining_capacity[j]=daily_capacity;
-cout<<"daily:"<< daily_remaining_capacity[j]<<"\n";}
+}
 //initalize all the remaining capacity as daily capacity
-
 treatment_time=(close_time - open_time)/(double)daily_capacity;
-
-
 }
 
 //this function checks whether the hospital is still available for that day
@@ -40,7 +37,7 @@ return;
   }
 
 void hospital::printapp(){
-  for int(i=0; i<daily_appointment_listsize();i++){
+  for (int i=0; i<daily_appointment_list.size();i++){
   daily_appointment_list[i]->pretty_print();
   }
   return;
@@ -58,27 +55,32 @@ w_app->patient->set_appointment(NULL);//set that person's appointment pointer to
 
 
 
-appointment::appointment(person<int>* a_patient, int date_out_of_queue)
-:patient(a_patient):hospitals(a_hospital_list){
+appointment::appointment(person<int>* a_patient, int date_out_of_queue, vector<hospital*> a_hospital_list)
+:patient(a_patient),hospitals(a_hospital_list){
     date= date_out_of_queue+1;//by default the appointment date should be the next day the person is out of queue
     hospital_id=-1;
-}
+    
+    
+    
+}//测试正确
 
 void appointment:: make_appointment(){
 while(hospital_id==-1&&date<100){//keep searching for days until available hospital is found
 int i=0;
-while (i< patient->hosp_num && (hospitals[hospital_id])->is_hospital_available(date) == false){i++;
+while (i< patient->hosp_num && (hospitals[i])->is_hospital_available(date) == false){i++;//新的修改，[]里应该是i
     //in one day, keep searching for all hospitals in the person's hospital ranking list, until 
     //one available is found
 }
+
 if(i<patient->hosp_num){
-    hospital_id=patient->hospital_ranking_list[i];
+    hospital_id=patient->hospital_id[i]; //新的修改
     the_time=(hospitals[hospital_id])->get_time_appointed(date);}
 else{date++;
 }
 }
+
 return;
-}
+}//测试正确
 
 void appointment::pretty_print(){
      cout<<"patient id is:"<<patient->show_id()<<"\n";
@@ -86,7 +88,8 @@ void appointment::pretty_print(){
      cout<<"date is: "<<date<<"\n";
      cout<<"time is: "<<the_time<<"\n";
   
-}
+}//测试正确
+
 
 
 
