@@ -206,7 +206,6 @@ template<class T>person<T>::person(string tableline)
     }
     //Set other necessary information
     status = 0; //Status initialized to 0
-    updated = false;
     //Set key
     set_key();
 }
@@ -319,11 +318,11 @@ template<class T>void person<T>::random_generate(int seed)
     Time = new double[2];
     Time[0] = rand() % 2016 + 0.1 * (rand() % 10);//2016时暂不考虑  
     Time[1] = -1;//-1表示不知道目前appointment time为什么时候
+    Time[2] = -1;
 
     //Create Withdraw and priority letter and other parameters;
     withdraw = false;
     letter = false;
-    updated = false;
     updated_half_day = -1;
 
     //Create local registry id and hopsital id
@@ -369,10 +368,6 @@ template<class T> void person<T>::set_key()
     
 
     //Withdraw priority
-    if ((withdraw == true) && ((risk_id == 0) || (risk_id == 1)))
-    {
-        key += 14 * 24 * 10;
-    }
 
     //age priority
     key += age_id * 100000;
@@ -447,8 +442,8 @@ template<class T> double* person<T>::show_hour()
 }
 template<class T> int* person<T>::show_day()
 {
-    int* Day = new int[2];
-    for(int i = 0;i < 2; i++)
+    int* Day = new int[3];
+    for(int i = 0;i < 3; i++)
     {
         if(((int)this->Time[i]) == -1){
             Day[i] = -1;
@@ -460,8 +455,8 @@ template<class T> int* person<T>::show_day()
 }
 template<class T>int* person<T>::show_half_day()
 {
-    int* half_day = new int[2];
-    for(int i = 0; i < 2;i++)
+    int* half_day = new int[3];
+    for(int i = 0; i < 3;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -474,8 +469,8 @@ template<class T>int* person<T>::show_half_day()
 }
 template<class T> int* person<T>::show_week()
 {
-    int* Week = new int[2];
-    for(int i = 0; i < 2; i++)
+    int* Week = new int[3];
+    for(int i = 0; i < 3; i++)
     {
         if(((int)this->Time[i]) == -1){
             Week[i] = -1;
@@ -488,8 +483,8 @@ template<class T> int* person<T>::show_week()
 
 template<class T> int* person<T>::show_month()
 {
-    int* Month = new int[2];
-    for(int i = 0; i < 2;i++)
+    int* Month = new int[3];
+    for(int i = 0; i < 3;i++)
     {
         if(((int)this->Time[i]) == -1){
             Month[i] = -1;
@@ -502,8 +497,8 @@ template<class T> int* person<T>::show_month()
 
 template<class T>int* person<T>::show_intHour()
 {
-    int* intHour = new int[2];
-    for(int i = 0; i < 2;i++)
+    int* intHour = new int[3];
+    for(int i = 0; i < 3;i++)
     {
         if(((int)Time[i]) == -1)
         {
@@ -517,11 +512,11 @@ template<class T>int* person<T>::show_intHour()
 }
 template<class T>string* person<T>::show_format_time()
 {
-    int* Month = new int[2];
-    int* Day = new int[2];
-    double* Hour = new double[2];
-    int* Minute = new int[2];
-    int* intHour = new int[2];
+    int* Month = new int[3];
+    int* Day = new int[3];
+    double* Hour = new double[3];
+    int* Minute = new int[3];
+    int* intHour = new int[3];
     string* format_time = new string[3];
 
     //Set month,day,hour,minute
@@ -531,7 +526,7 @@ template<class T>string* person<T>::show_format_time()
     intHour = this->show_intHour();
 
     //修正double计算造成的时间不准确
-     for(int i = 0; i < 2;i++)
+     for(int i = 0; i < 3;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -550,7 +545,7 @@ template<class T>string* person<T>::show_format_time()
         if(abs(dif - 0.8) < 0.001) {Minute[i] = 48;}
         if(abs(dif - 0.9) < 0.001) {Minute[i] = 54;}
     }
-    for(int i = 0; i < 2;i++)
+    for(int i = 0; i < 3;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -608,13 +603,20 @@ template<class T> void person<T>::set_appointment(appointment* r_appoint)
         Time[1] = r_appoint->the_time;
 
     }
-
+}
+template<class T>void person<T>::set_assign_appointment_time(int day)
+{
+    Time[2] = day * 24;
 }
 
 template<class T>void person<T>::punish()
 {
-    this->Time[0] += 14 * 24;
-    this->set_key();    
+    if ((risk_id == 0) || (risk_id == 1))
+    {
+        this->Time[0] += 14 * 24;
+        this->set_key();    
+    }
+
 }
 
 // template<class T>void person<T>::random_generate(int seed, person<int>)
@@ -783,8 +785,6 @@ void TableWrite::table_create()
     //按注册时间selection sort
     person<int>* sorted_p = this->SelectionSort(p,num,0);
 
-
-
     //随机取若干人，转化为withdraw
     person<int>* withdraw_p = new person<int>[withdraw_num];
     for(int i = 0; i < withdraw_num; i++)
@@ -814,7 +814,6 @@ void TableWrite::table_create()
             index = rand() % (num - last_halfday_num - 1);  //Withdraw的人不会update
         }
         updated_p[i] = sorted_p[index];
-        sorted_p[index].updated = true; //将来有一次update，那么不考虑withdraw
         int prof_index = rand() % 8;
         updated_p[i].prof = prof_set[prof_index];
         updated_p[i].prof_id = prof_index;
@@ -832,7 +831,6 @@ void TableWrite::table_create()
             updated_half_day = sorted_p[index].show_half_day()[0] + rand() % 10 + 1;
         }
         updated_p[i].updated_half_day = updated_half_day;
-        updated_p[i].updated = true; 
     }
     updated_p = SelectionSort(updated_p,updated_num,1);
 
