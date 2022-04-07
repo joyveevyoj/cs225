@@ -55,7 +55,7 @@ public:
     bool is_newwithdraw(person<int>* oldper);//check whether this is a new withdraw
     bool is_withdraw(); //return withdraw
     void set_appointment(appointment* r_appoint);
-    void set_assign_appointment_time(int day);
+    void set_assign_appointment_time(double hour);
     void punish();   
     void display_all(); //Display all information of this person
 
@@ -230,6 +230,7 @@ private:
     double open_time;
     double close_time;
     double treatment_time;
+
 };
 
 

@@ -604,9 +604,9 @@ template<class T> void person<T>::set_appointment(appointment* r_appoint)
 
     }
 }
-template<class T>void person<T>::set_assign_appointment_time(int day)
+template<class T>void person<T>::set_assign_appointment_time(double hour)
 {
-    Time[2] = day * 24;
+    Time[2] = hour;
 }
 
 template<class T>void person<T>::punish()
