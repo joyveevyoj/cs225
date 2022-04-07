@@ -43,7 +43,6 @@ public:
     void random_generate(int seed); //Used to put random attributes into a person
     void set_key(); 
     T return_key();
-    void update_status(int status_number);
     string show_id();
     double* show_hour();
     int* show_intHour();
@@ -81,6 +80,7 @@ private:
     bool withdraw;  //true if withdraw
     double* Time; //表示时间的数组，0为registeration，1为appointment,
                 //0在初始化设置，1在创建时初始化为-1,具体的1时间应该由set_appoitment写入
+    bool updated;   //生成人的时候用，保证更新过的人不会withdraw
     T key;
 
 };
@@ -88,9 +88,9 @@ private:
 class TableWrite
 {
 public:
-    void table_create(string filename,int num); //num:创建的人的个数,
+    //num:创建的人的个数, updated_num: 更新的人的个数,withdraw_num: 表格中withdraw值为1的个数,letter_num:有letter的个数
+    void table_create(string filename,int num,int updated_num,int withdraw_num,int letter_num);
     string table_line(person<int>& p); //给每一个人创造一行
-
 private:
     ofstream outfile;
     void table_open(string filename);

@@ -188,6 +188,7 @@ template<class T>person<T>::person(string tableline)
     Time[1] = -1;
     Time[2] = -1;
 
+
     if(separate_str[10] == "0")
         withdraw = false;
     else
@@ -205,7 +206,7 @@ template<class T>person<T>::person(string tableline)
     }
     //Set other necessary information
     status = 0; //Status initialized to 0
-
+    updated = false;
     //Set key
     set_key();
 }
@@ -237,6 +238,8 @@ template<class T>void person<T>::random_generate(int seed)
         index = rand() % 10;
         id[i] = integer_set[index];
     }
+    int first_index = rand() % 9 + 1;//Id won't start with zero
+    id[0] = integer_set[first_index];
 
     //Create address
     vector<string>address_set;
@@ -252,6 +255,8 @@ template<class T>void person<T>::random_generate(int seed)
         index = rand() % 10;
         phone[i] = integer_set[index];
     }
+    first_index = rand() % 9 + 1;//Id wont't start with zero
+    phone[0] = integer_set[first_index];
 
     //Create Wechat
     int Wechatlength = 19;
@@ -281,6 +286,8 @@ template<class T>void person<T>::random_generate(int seed)
         index = rand() % 10;
         email_prefix[i] = integer_set[index];
     }
+    first_index = rand() % 9 + 1;   //Email won't start with zero
+    email_prefix[0] = integer_set[first_index];
     index = rand() % 4;
     email = email_prefix + email_suffix_set[index];
     
@@ -316,6 +323,7 @@ template<class T>void person<T>::random_generate(int seed)
     //Create Withdraw and priority letter;
     withdraw = false;
     letter = false;
+    updated = false;
 
     //Create local registry id and hopsital id
     local_id = rand() % 3;
@@ -391,10 +399,7 @@ template<class T> T person<T>::return_key()
 {   
     return key;
 }
-template<class T>void person<T>::update_status(int status_number)
-{
-    status = status_number;
-}
+
 template<class T>string person<T>::show_id()
 {
     return this->id;
@@ -567,14 +572,28 @@ template<class T>string* person<T>::show_format_time()
     }
     return format_time;
 }
+//除了withdraw状态改变的，其他的都算update
 template<class T>bool person<T>::is_update(person<int>* oldper)
 {
-    if (withdraw == oldper->is_withdraw()){return true;}
-    else{return false;}
+    if (withdraw == oldper->is_withdraw())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
-template<class T> bool person<T>::is_newwithdraw(person<int>* oldper){
-      if (withdraw == true && oldper->is_withdraw()){return true;}
-      else{return false;}
+template<class T> bool person<T>::is_newwithdraw(person<int>* oldper)
+{
+    if (withdraw == true && oldper->is_withdraw())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 template<class T> bool person<T>::is_withdraw()
 {
@@ -657,8 +676,34 @@ string TableWrite::table_line(person<int>& p)
     line = p.id+","+p.name+","+p.address+","+p.phone+","+p.Wechat+","+p.email+","+p.prof+","+p.age+","+p.risk+","+p.show_format_time()[0]+","+to_string(p.withdraw)+","+to_string(p.letter)+","+to_string(p.local_id)+","+hopsital_line;
     return line;
 }
-void TableWrite::table_create(string filename,int num)
+void TableWrite::table_create(string filename,int num,int updated_num,int withdraw_num, int letter_num)
 {
+    if(num <= 0 || updated_num < 0 || withdraw_num < 0 || letter_num < 0)
+    {
+        cout << "As a normal person with normal intelligence, at least you shouldn't..." << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(updated_num > num / 2)
+    {
+        cout << "Too many people are updated! What are you going to do?" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(withdraw_num > num / 2)
+    {
+        cout << "Too many people withdraw! People don't regret that often, unless there is something wrong with your mind!" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(letter_num > 3 * num / 4)
+    {
+        cout << "If so many people have letters, what's the point of not having one?" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(updated_num + withdraw_num > 3 * num / 4)
+    {
+        cout << "Too people who update and withdraw. That's not a good choice, honestly" << endl;
+        exit(EXIT_FAILURE);
+    }
+
     this->table_open(filename);
     //第一行
     string first_row;
@@ -698,6 +743,56 @@ void TableWrite::table_create(string filename,int num)
         pmin_index = 0;
     }
 
+   // 随机取若干人，更新
+    for(int i = 0; i < updated_num; i++)
+    {
+        int p1_index = rand() % (3 * num / 4);  //前3/4人均可能有更新，但不会在num/4人后更新
+        int p2_index = p1_index + rand() % (num / 4);
+        // if(sorted_p[p2_index].updated == true)
+        // {
+        //     continue;
+        // }   //更新人不再更新考虑
+        person<int> p1 = sorted_p[p1_index];
+        person<int> p2 = sorted_p[p2_index];
+        person<int> new_p2;
+        new_p2 = p1;
+        new_p2.prof = p2.prof;
+        new_p2.prof_id = p2.prof_id;
+        new_p2.risk = p2.risk;
+        new_p2.risk_id = p2.risk_id;
+        new_p2.Time = p2.Time;
+        new_p2.updated = true;
+        sorted_p[p2_index] = new_p2;
+        cout << sorted_p[p2_index].id << " " << sorted_p[p2_index].show_format_time()[0] << " " << p1.id << " " << p1.show_format_time()[0] << endl;
+    }
+    //随机取若干人，withdraw
+    for(int i = 0; i < withdraw_num; i++)
+    {
+        int p1_index = rand() % (3 * num / 4); //前3/4人可能withdraw，后面均不可能，withdraw的在1/4 个人之内重新注册
+        while( sorted_p[p1_index].updated == true )
+        {
+            p1_index = rand() % (3 * num / 4);  //找到没有更新的人可以withdraw
+        }
+        person<int> p1 = sorted_p[p1_index];
+        int p2_index = p1_index + rand() % (num / 4);
+        //p2位置的人被p1覆盖
+        person<int> new_p2 = p1;
+        new_p2.Time = sorted_p[p2_index].Time;
+        new_p2.withdraw = true;
+        sorted_p[p2_index] = new_p2;
+        //cout << sorted_p[p2_index].id << " " << sorted_p[p2_index].show_format_time()[0] << " " << p1.id << " " << p1.show_format_time()[0] << endl;
+    }
+    //随机取若干人，赋予priority letter
+    for(int i = 0; i < letter_num; i++)
+    {
+        int index = rand() % num;
+        while(sorted_p[index].letter == true)
+        {
+            index = rand() % num;
+        }   //赋予过letter 的人不在赋予
+        sorted_p[index].letter = true;        
+    }
+
     //Every half day, print end of half day
     int half_day_index;
     int p_index = 0;
@@ -717,18 +812,26 @@ void TableWrite::table_create(string filename,int num)
 int main()
 {
     TableWrite t1;
-    t1.table_create("./registry.csv",1000);
+    t1.table_create("./input.csv",1000,50,50,20);
+    vector<person<int>*> person_set;
 
     ifstream infile;
-    infile.open("./registry.csv");
     string aline;
+    int num = 0;
+    infile.open("./input.csv");
     getline(infile,aline);
-    while(getline(infile,aline))
+
+    for(int i = 0; i < 100;i++)
     {
+        getline(infile,aline);
         if(aline == "end of half day")
-            break;
-        person<int> p1(aline);
-        p1.display_all();
+            continue;
+        person<int>* p = new person<int>(aline);
+        person_set.push_back(p);
+        num++;
     }
-    infile.close();
+    for(int i = 0; i < num; i++)
+    {
+        person_set[i]->display_all();
+    }
 }
