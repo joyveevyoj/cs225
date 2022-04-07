@@ -1,10 +1,16 @@
-#include<vector>
 #include <stdio.h>
 #include <iostream>
-using namespace std;
-#include "head.h"
+#include<vector>
+#include <fstream>
+#include "cassert"
 #include <string>
 #include <cstring>
+#include <stdlib.h>
+#include <time.h>
+#include <cmath>
+#include <iomanip>
+#include <cstdlib>
+using namespace std;
 
 
 hospital::hospital(int idnum, int capacity, double o_time, double c_time)
@@ -12,7 +18,10 @@ hospital::hospital(int idnum, int capacity, double o_time, double c_time)
 for (int j=0; j<100; j++){daily_remaining_capacity[j]=daily_capacity;
 }
 //initalize all the remaining capacity as daily capacity
+
 treatment_time=(close_time - open_time)/(double)daily_capacity;
+
+
 }
 
 //this function checks whether the hospital is still available for that day
@@ -37,11 +46,12 @@ return;
   }
 
 void hospital::printapp(){
-  for (int i=0; i<daily_appointment_list.size();i++){
+  for (int i=0; i<daily_appointment_list.size();i++){//新修改，加了.
   daily_appointment_list[i]->pretty_print();
   }
   return;
 }
+
 void hospital::withdraw_app(appointment* w_app){
 for (vector<appointment*>::iterator iter=daily_appointment_list.begin();iter!=daily_appointment_list.end();iter++){
   if(*iter==w_app){
@@ -50,9 +60,8 @@ for (vector<appointment*>::iterator iter=daily_appointment_list.begin();iter!=da
   }
 }//find that appointment and delete it from the appointment list
 w_app->patient->set_appointment(NULL);//set that person's appointment pointer to be null
-
+ 
 }
-
 
 
 appointment::appointment(person<int>* a_patient, int date_out_of_queue, vector<hospital*> a_hospital_list)
@@ -62,7 +71,7 @@ appointment::appointment(person<int>* a_patient, int date_out_of_queue, vector<h
     
     
     
-}//测试正确
+}
 
 void appointment:: make_appointment(){
 while(hospital_id==-1&&date<100){//keep searching for days until available hospital is found
@@ -73,14 +82,14 @@ while (i< patient->hosp_num && (hospitals[i])->is_hospital_available(date) == fa
 }
 
 if(i<patient->hosp_num){
-    hospital_id=patient->hospital_id[i]; //新的修改
+    hospital_id=patient->hospital_id[i]; //新的修改,不叫ranking list了
     the_time=(hospitals[hospital_id])->get_time_appointed(date);}
 else{date++;
 }
 }
 
 return;
-}//测试正确
+}
 
 void appointment::pretty_print(){
      cout<<"patient id is:"<<patient->show_id()<<"\n";
@@ -88,25 +97,13 @@ void appointment::pretty_print(){
      cout<<"date is: "<<date<<"\n";
      cout<<"time is: "<<the_time<<"\n";
   
-}//测试正确
-
+}
 
 
 
 bool appointment::is_appointment_passed(double current_hour){
-double app_hour = (double)(date*24)+time;
+double app_hour = (double)((date-1)*24)+the_time;
 if(app_hour<=current_hour){return true;}
 else{return false;}
 
 }
-
-
- 
-
-
-
-
-
-
-
- 
