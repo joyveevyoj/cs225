@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iomanip>
 #include <cstdlib>
+#include "head.h"
 using namespace std;
 
 int main(){
@@ -142,9 +143,10 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   int hos_id=a_appointment->hospital_id;
   hospital_list[hos_id]->add_to_applist(a_appointment);//make appointment and add them to the fibonacci heap
   a_reportlist.push_appoi(2,a_appointment);//update that person's status and set his appointment
+  temp_person->set_assign_appointment_time(hour);
   
   }
-  }
+  }/*
   if(halfday%14==0){
    week++;
    Weeklyreport tem_weeklyreport(a_reportlist.rl, hour);
@@ -157,7 +159,7 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   Monthlyreport tem_monthlyreport(a_reportlist.rl, hour);
   tem_monthlyreport.Save(month);//generate the monthly report
   }//increment the time relavent counters and output weekly and monthly report
-  
+  */
  }//else halfdate ends
  
 //最好写一下delete[],delete
