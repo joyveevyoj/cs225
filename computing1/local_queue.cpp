@@ -320,10 +320,11 @@ template<class T>void person<T>::random_generate(int seed)
     Time[0] = rand() % 2016 + 0.1 * (rand() % 10);//2016时暂不考虑  
     Time[1] = -1;//-1表示不知道目前appointment time为什么时候
 
-    //Create Withdraw and priority letter;
+    //Create Withdraw and priority letter and other parameters;
     withdraw = false;
     letter = false;
     updated = false;
+    updated_half_day = -1;
 
     //Create local registry id and hopsital id
     local_id = rand() % 3;
@@ -586,7 +587,7 @@ template<class T>bool person<T>::is_update(person<int>* oldper)
 }
 template<class T> bool person<T>::is_newwithdraw(person<int>* oldper)
 {
-    if (withdraw == true && oldper->is_withdraw())
+    if (withdraw == true && oldper->is_withdraw() == false)
     {
         return true;
     }
@@ -602,7 +603,12 @@ template<class T> bool person<T>::is_withdraw()
 template<class T> void person<T>::set_appointment(appointment* r_appoint)
 {
     p_appoint = r_appoint;
-    Time[1] = r_appoint->the_time;
+    if(r_appoint != NULL)
+    {
+        Time[1] = r_appoint->the_time;
+
+    }
+
 }
 
 template<class T>void person<T>::punish()
@@ -610,6 +616,11 @@ template<class T>void person<T>::punish()
     this->Time[0] += 14 * 24;
     this->set_key();    
 }
+
+// template<class T>void person<T>::random_generate(int seed, person<int>)
+// {
+
+// }
 template<class T>void person<T>::display_all()
 {
     cout << endl;
@@ -676,9 +687,55 @@ string TableWrite::table_line(person<int>& p)
     line = p.id+","+p.name+","+p.address+","+p.phone+","+p.Wechat+","+p.email+","+p.prof+","+p.age+","+p.risk+","+p.show_format_time()[0]+","+to_string(p.withdraw)+","+to_string(p.letter)+","+to_string(p.local_id)+","+hopsital_line;
     return line;
 }
-void TableWrite::table_create(string filename,int num,int updated_num,int withdraw_num, int letter_num)
+person<int>* TableWrite::SelectionSort(person<int>* p,int num_of_person,int way)
 {
-    if(num <= 0 || updated_num < 0 || withdraw_num < 0 || letter_num < 0)
+    person<int> pmin = p[0]; 
+    int pmin_index = 0;
+    person<int>* sorted_p = new person<int>[num_of_person];
+    if(way == 0)
+    {
+        
+    }
+    for(int i =0; i < num_of_person;i++)
+    {
+        //选出最小的
+        for(int j = 0; j < num_of_person - i; j++)
+        {
+            if(way == 0)
+            {
+                if(p[j].Time[0] < pmin.Time[0])
+                {
+                pmin = p[j];
+                pmin_index = j;
+                }
+            }
+            if(way == 1)
+            {
+                if(p[j].updated_half_day < pmin.updated_half_day)
+                {
+                    pmin = p[j];
+                    pmin_index = j;
+                }
+            }
+        }
+        //加到sorted list去
+        sorted_p[i] = pmin;
+        //把pmin从原list删除
+        for(int j = pmin_index; j < num_of_person - i - 1;j++)
+        {
+            p[j] = p[j+1];
+        }
+        //更新pmin
+        pmin = p[0];
+        pmin_index = 0;
+    }
+    return sorted_p;
+
+}
+
+TableWrite::TableWrite(string filename_,int num_,int updated_num_,int withdraw_num_)
+{
+    if(num <= 0 || updated_num < 0 || withdraw_num < 0)
     {
         cout << "As a normal person with normal intelligence, at least you shouldn't..." << endl;
         exit(EXIT_FAILURE);
@@ -693,109 +750,96 @@ void TableWrite::table_create(string filename,int num,int updated_num,int withdr
         cout << "Too many people withdraw! People don't regret that often, unless there is something wrong with your mind!" << endl;
         exit(EXIT_FAILURE);
     }
-    if(letter_num > 3 * num / 4)
-    {
-        cout << "If so many people have letters, what's the point of not having one?" << endl;
-        exit(EXIT_FAILURE);
-    }
     if(updated_num + withdraw_num > 3 * num / 4)
     {
         cout << "Too people who update and withdraw. That's not a good choice, honestly" << endl;
         exit(EXIT_FAILURE);
     }
 
+    filename = filename_;
+    num = num_;
+    updated_num = updated_num_;
+    withdraw_num = withdraw_num_;
+}
+
+void TableWrite::table_create()
+{
     this->table_open(filename);
     //第一行
+    srand((unsigned)(time(NULL)));
     string first_row;
     first_row = "ID,Name,Address,Phone,WeChat,Email,Profession,Age,Risk Status,Registration Time,Withdraw,Priority Letter,Local Registry ID,Hopsital ID\n" ;
     outfile << first_row;
-    //创造num 个人
+    //创造num+withdraw 个人
+    num = num + withdraw_num;
     person<int>* p = new person<int>[num];
+    int last_halfday_num = 0;
     for(int i = 0;i < num;i++)
     {
         p[i].random_generate(i);
-    }
 
+        if(p[i].show_half_day()[0] == 167) {last_halfday_num++; }
+    }
     //按注册时间selection sort
-    person<int> pmin = p[0]; 
-    int pmin_index = 0;
-    person<int>* sorted_p = new person<int>[num];
+    person<int>* sorted_p = this->SelectionSort(p,num,0);
 
-    for(int i =0; i < num;i++)
-    {
-        //选出最小的
-        for(int j = 0; j < num - i; j++)
-        {
-            if(p[j].Time[0] < pmin.Time[0]){
-                pmin = p[j];
-                pmin_index = j;
-            }
-        }
-        //加到sorted list去
-        sorted_p[i] = pmin;
-        //把pmin从原list删除
-        for(int j = pmin_index; j < num - i - 1;j++)
-        {
-            p[j] = p[j+1];
-        }
-        //更新pmin
-        pmin = p[0];
-        pmin_index = 0;
-    }
 
-   // 随机取若干人，更新
-    for(int i = 0; i < updated_num; i++)
-    {
-        int p1_index = rand() % (3 * num / 4);  //前3/4人均可能有更新，但不会在num/4人后更新
-        int p2_index = p1_index + rand() % (num / 4);
-        // if(sorted_p[p2_index].updated == true)
-        // {
-        //     continue;
-        // }   //更新人不再更新考虑
-        person<int> p1 = sorted_p[p1_index];
-        person<int> p2 = sorted_p[p2_index];
-        person<int> new_p2;
-        new_p2 = p1;
-        new_p2.prof = p2.prof;
-        new_p2.prof_id = p2.prof_id;
-        new_p2.risk = p2.risk;
-        new_p2.risk_id = p2.risk_id;
-        new_p2.Time = p2.Time;
-        new_p2.updated = true;
-        sorted_p[p2_index] = new_p2;
-        cout << sorted_p[p2_index].id << " " << sorted_p[p2_index].show_format_time()[0] << " " << p1.id << " " << p1.show_format_time()[0] << endl;
-    }
-    //随机取若干人，withdraw
+
+    //随机取若干人，转化为withdraw
+    person<int>* withdraw_p = new person<int>[withdraw_num];
     for(int i = 0; i < withdraw_num; i++)
     {
-        int p1_index = rand() % (3 * num / 4); //前3/4人可能withdraw，后面均不可能，withdraw的在1/4 个人之内重新注册
-        while( sorted_p[p1_index].updated == true )
-        {
-            p1_index = rand() % (3 * num / 4);  //找到没有更新的人可以withdraw
-        }
+        int p1_index = rand() % (num - last_halfday_num); //最后半天的人不会withdraw
         person<int> p1 = sorted_p[p1_index];
-        int p2_index = p1_index + rand() % (num / 4);
+        int p2_index = p1_index + rand() % ( 6 * num / 168);    //平均加三天
+        while(p2_index >= num || p2_index == p1_index)
+        {
+            p2_index = p1_index + rand() % (3 * num / 168) + 1;
+        }
         //p2位置的人被p1覆盖
         person<int> new_p2 = p1;
         new_p2.Time = sorted_p[p2_index].Time;
         new_p2.withdraw = true;
         sorted_p[p2_index] = new_p2;
-        //cout << sorted_p[p2_index].id << " " << sorted_p[p2_index].show_format_time()[0] << " " << p1.id << " " << p1.show_format_time()[0] << endl;
     }
-    //随机取若干人，赋予priority letter
-    for(int i = 0; i < letter_num; i++)
+
+   // 随机取若干人，更新
+    person<int>* updated_p = new person<int>[updated_num];
+   
+    for(int i = 0; i < updated_num;i++)
     {
-        int index = rand() % num;
-        while(sorted_p[index].letter == true)
+        int index = rand() % (num - last_halfday_num - 1); //最后半天的人不会更新
+        while(sorted_p[index].withdraw == true)
         {
-            index = rand() % num;
-        }   //赋予过letter 的人不在赋予
-        sorted_p[index].letter = true;        
+            index = rand() % (num - last_halfday_num - 1);  //Withdraw的人不会update
+        }
+        updated_p[i] = sorted_p[index];
+        sorted_p[index].updated = true; //将来有一次update，那么不考虑withdraw
+        int prof_index = rand() % 8;
+        updated_p[i].prof = prof_set[prof_index];
+        updated_p[i].prof_id = prof_index;
+        int risk_index = rand() % 4;
+        updated_p[i].risk = risk_set[risk_index];
+        updated_p[i].risk_id = risk_index;
+        bool letter_set[4] = {false,false,false,true};
+        int letter_index = rand() % 4;
+        updated_p[i].letter = letter_set[letter_index];
+        //设置更新的时间
+        int updated_half_day = sorted_p[index].show_half_day()[0] + rand() % 20;
+        //若时间超，或者同一天更新，重新设置
+        while(updated_half_day > 167 || updated_half_day == sorted_p[index].show_half_day()[0])
+        {
+            updated_half_day = sorted_p[index].show_half_day()[0] + rand() % 10 + 1;
+        }
+        updated_p[i].updated_half_day = updated_half_day;
+        updated_p[i].updated = true; 
     }
+    updated_p = SelectionSort(updated_p,updated_num,1);
 
     //Every half day, print end of half day
     int half_day_index;
     int p_index = 0;
+    int updated_half_day_index = 0;;
     for(half_day_index = 0; half_day_index < 168; half_day_index++)
     {
         
@@ -804,6 +848,11 @@ void TableWrite::table_create(string filename,int num,int updated_num,int withdr
             outfile << this->table_line(sorted_p[p_index]) << "\n";
             p_index++;
         }
+        while( (updated_half_day_index < updated_num) && (updated_p[updated_half_day_index].updated_half_day == half_day_index) && (half_day_index < 168))
+        {
+            outfile << this->table_line(updated_p[updated_half_day_index]) << "\n";
+            updated_half_day_index++;
+        }        
         outfile << "end of half day" << "\n";
     } 
     this->table_close();
@@ -811,27 +860,25 @@ void TableWrite::table_create(string filename,int num,int updated_num,int withdr
 
 int main()
 {
-    TableWrite t1;
-    t1.table_create("./input.csv",1000,50,50,20);
-    vector<person<int>*> person_set;
+    TableWrite t1("./input.csv",100,10,10);
+    t1.table_create();
+    // ifstream infile;
+    // string aline;
+    // int num = 0;
+    // infile.open("./input.csv");
+    // getline(infile,aline);
 
-    ifstream infile;
-    string aline;
-    int num = 0;
-    infile.open("./input.csv");
-    getline(infile,aline);
-
-    for(int i = 0; i < 100;i++)
-    {
-        getline(infile,aline);
-        if(aline == "end of half day")
-            continue;
-        person<int>* p = new person<int>(aline);
-        person_set.push_back(p);
-        num++;
-    }
-    for(int i = 0; i < num; i++)
-    {
-        person_set[i]->display_all();
-    }
+    // for(int i = 0; i < 100;i++)
+    // {
+    //     getline(infile,aline);
+    //     if(aline == "end of half day")
+    //         continue;
+    //     person<int>* p = new person<int>(aline);
+    //     person_set.push_back(p);
+    //     num++;
+    // }
+    // for(int i = 0; i < num; i++)
+    // {
+    //     person_set[i]->display_all();
+    // }
 }
