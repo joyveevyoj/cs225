@@ -1,8 +1,16 @@
-#include "head.h" 
-#include<vector>
-using namespace std ;
 #include <stdio.h>
-#include<iostream>
+#include <iostream>
+#include<vector>
+#include <fstream>
+#include "cassert"
+#include <string>
+#include <cstring>
+#include <stdlib.h>
+#include <time.h>
+#include <cmath>
+#include <iomanip>
+#include <cstdlib>
+using namespace std;
 
 void reportlist::push_new(int r_status, person<int>* patient){
     rl.push_back(patient) ;
@@ -18,10 +26,6 @@ void reportlist::push_old(int r_status, person<int>* patient){
     
         }
     }
-    
-
-    
-
 }
 
 void reportlist::push_appoi(int r_status, appointment* r_appointment){
@@ -43,5 +47,4 @@ person<int>* reportlist::exist(person<int>* patient){
     return NULL ; //if not find , return null
 
 }
-
 
