@@ -31,14 +31,14 @@ private:
     void deallocate(void);
 };
 
- 
+
 template <class T>class person
 {
 public:
     friend class TableWrite;
     friend class Weeklyreport;
     friend class Monthlyreport;
-    person();       //If no argument, create one,key is set as well
+    person();       //If no argument, create an empty person
     person(string tableline);   //Create a person from local registry
     void random_generate(int seed); //Used to put random attributes into a person
     void set_key(); 
@@ -49,13 +49,14 @@ public:
     int* show_day();
     int* show_half_day();
     int* show_week();
-    int* show_month();  //从零开始的统一时间
-    string* show_format_time();
+    int* show_month();  
+    string* show_format_time(); //All Time starts at zero
     bool is_update(person<int>* oldper); //check whether this is an update
     bool is_newwithdraw(person<int>* oldper);//check whether this is a new withdraw
     bool is_withdraw(); //return withdraw
-    void set_appointment(appointment* r_appoint);    //Not written yet
-    void punish();   //Not written yet
+    void set_appointment(appointment* r_appoint);
+    void set_assign_appointment_time(int day);
+    void punish();   
     void display_all(); //Display all information of this person
 
     int local_id;   
@@ -78,9 +79,9 @@ private:
     string Wechat;
     string email;
     bool withdraw;  //true if withdraw
-    double* Time; //表示时间的数组，0为registeration，1为appointment,
-                //0在初始化设置，1在创建时初始化为-1,具体的1时间应该由set_appoitment写入
-    bool updated;   //生成人的时候用，保证更新过的人不会withdraw
+    double* Time;    //Array representing time. 0 is registeration time，1 is appointment time,2 is the time when appointment is assigned
+                     //If not initialized, set as -1;
+    int updated_half_day; //更新的某一半天  -1表示没有更新
     T key;
 
 };
@@ -88,13 +89,19 @@ private:
 class TableWrite
 {
 public:
+    TableWrite(string filename_,int num_,int updated_num_,int withdraw_num_);
     //num:创建的人的个数, updated_num: 更新的人的个数,withdraw_num: 表格中withdraw值为1的个数,letter_num:有letter的个数
-    void table_create(string filename,int num,int updated_num,int withdraw_num,int letter_num);
+    void table_create();
     string table_line(person<int>& p); //给每一个人创造一行
 private:
     ofstream outfile;
+    string filename;
+    int num;
+    int updated_num;
+    int withdraw_num;
     void table_open(string filename);
     void table_close();
+    person<int>* SelectionSort(person<int>* p,int num_of_person,int way);   //way=0，根据注册时间排序，way=1，根据更新的半天排序
 };
 
 
@@ -190,44 +197,40 @@ private:
     // 打印"斐波那契堆"
     void print(Fb_node<T> *node, Fb_node<T> *prev, int direction);
 };
-
 class appointment
 {
 public:
-  appointment(person<int>* a_patient, int date_out_of_queue, vector<hospital*> a_hospital_list);
-  //virtual ~appointment();
-  vector<hospital*> hospitals;
-  void make_appointment();
-  void appointment_withdraw();
-  void pretty_print();
-  bool is_appointment_passed(double current_hour);
-  int hospital_id;
-  person<int>* patient;
-  double the_time;
-  int date;
-    
-
+    appointment(person<int>* a_patient, int date_out_of_queue, vector<hospital*> a_hospital_list);
+    //virtual ~appointment();
+    vector<hospital*> hospitals;
+    void make_appointment();
+    void appointment_withdraw();
+    void pretty_print();
+    bool is_appointment_passed(double current_hour);
+    int hospital_id;
+    person<int>* patient;
+    double the_time;
+    int date;
 };
 
 class hospital
 {
 public:
-  hospital(int idnum, int capacity, double o_time, double c_time);
-  bool is_hospital_available(int h_date);
-  double get_time_appointed(int h_date);
-  int id;//the hospital's unique id number, which marks its position in the hospital list.
-  vector<appointment*> daily_appointment_list;
-  void add_to_applist(appointment* new_app);
-  void printapp();
-  int daily_remaining_capacity[100];
+    hospital(int idnum, int capacity, double o_time, double c_time);
+    bool is_hospital_available(int h_date);
+    double get_time_appointed(int h_date);
+    int id;//the hospital's unique id number, which marks its position in the hospital list.
+    vector<appointment*> daily_appointment_list;
+    void add_to_applist(appointment* new_app);
+    void printapp();
+    void withdraw_app(appointment* w_app);//新改的，头文件里忘记加了
+    int daily_remaining_capacity[100];
 private:
-  int daily_capacity;
-  double open_time;
-  double close_time;
-  double treatment_time;
-
+    int daily_capacity;
+    double open_time;
+    double close_time;
+    double treatment_time;
 };
-
 
 
 class reportlist
