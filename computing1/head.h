@@ -65,12 +65,14 @@ public:
     void set_assign_appointment_time(double hour);
     void punish();   
     void display_all(); //Display all information of this person
+    string show_risk();
 
     int local_id;   
     int* hospital_id;    //Array with index for the hospital，即hopsital's ranking list 
     int hosp_num;   //Initailized when the person is created
     int status;
     appointment* p_appoint;
+    void withdraw_time(double hour);
 private:
     bool letter;    //true if there is letter for ddl
     int risk_id;
@@ -86,6 +88,7 @@ private:
     string Wechat;
     string email;
     bool withdraw;  //true if withdraw
+    bool wont_withdraw;  //Used only for creating peson who withdraw. Don't get confused
     double* Time;    //Array representing time. 0 is registeration time，1 is appointment time,2 is the time when appointment is assigned
                      //If not initialized, set as -1;
     int updated_half_day; //更新的某一半天  -1表示没有更新
@@ -180,6 +183,8 @@ public:
     void update(person<int>*newpatient, person<int>* oldpatient); // update the old patient's key value into new value and new pointer
     void remove(person<int>* oldpatient);//delete this old patient
     int getnum(){return numnodes;}; // return number of nodes in the heap
+    person<int>* rtminperson(void){return min->patient ;};
+    void showpriority(void);
 };
 
 
@@ -244,19 +249,16 @@ public:
     
     int getlength(vector<person<int>*> report_list);
 
-    double waitingtime1(double a, double b);
+    double waitingtime(double a, double b);
 
-    double waitingtime2(double a, double b);
+    void Save(int week,string file_head);
 
-    double waitingtime3(double a, double b);
-
-    void Save();
-
-    void Sort();
+    void Sort(int week);
 
 private:
 
     vector<person<int>*> rl;   
+    
 };
 
 
@@ -265,8 +267,7 @@ class Monthlyreport
 {
 public:
     double current_time;
-    Monthlyreport(){ cout << "constructor" << endl;} ;
-
+   
     Monthlyreport(vector<person<int>*> report_list, double Time){
         rl = report_list;
         current_time = Time;
@@ -274,19 +275,21 @@ public:
 
     int getlength(vector<person<int>*> report_list);
 
-    int appointment_num(vector<person<int>*> report_list);
+    int getlength_m(vector<person<int>*> report_list, int month);
 
-    int treatment_num(vector<person<int>*> report_list);
+    int appointment_num(vector<person<int>*> report_list, int month);
 
-    int withdraw_num(vector<person<int>*> report_list);
+    int treatment_num(vector<person<int>*> report_list, int month);
 
-    double average_time(double, double, int);
+    int withdraw_num(vector<person<int>*> report_list, int month);
 
-    int register_waiting_num(int a, int b);
+    double average_time(vector<person<int>*> report_list, int month);
 
-    int intotal_waiting_num(int a, int b);
+    int register_waiting_num(int id, int month);
 
-    void Save();
+    int intotal_waiting_num(int a, int b, int c);
+
+    void Save(int month);
 
 private:
 
