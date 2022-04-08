@@ -258,11 +258,7 @@ public:
     
     int getlength(vector<person<int>*> report_list);
 
-    double waitingtime1(double a, double b);
-
-    double waitingtime2(double a, double b);
-
-    double waitingtime3(double a, double b);
+    double waitingtime(double a, double b);
 
     void Save(int week,string file_head);
 
@@ -280,24 +276,23 @@ class Monthlyreport
 {
 public:
     double current_time;
-    Monthlyreport(){ cout << "constructor" << endl;} ;
-
+   
     Monthlyreport(vector<person<int>*> report_list, double Time){
         rl = report_list;
         current_time = Time;
     }
 
-    int getlength(vector<person<int>*> report_list);
+    int getlength(vector<person<int>*> report_list, int month);
 
-    int appointment_num(vector<person<int>*> report_list);
+    int appointment_num(vector<person<int>*> report_list, int month);
 
-    int treatment_num(vector<person<int>*> report_list);
+    int treatment_num(vector<person<int>*> report_list, int month);
 
-    int withdraw_num(vector<person<int>*> report_list);
+    int withdraw_num(vector<person<int>*> report_list, int month);
 
-    double average_time(vector<person<int>*> report_list);
+    double average_time(vector<person<int>*> report_list, int month);
 
-    int register_waiting_num(int id);
+    int register_waiting_num(int id, int month);
 
     int intotal_waiting_num(int a, int b);
 
@@ -308,15 +303,7 @@ private:
     vector<person<int>*> rl;
 };
 
-double Weeklyreport::waitingtime1(double a, double b){
-    return b - a;
-}
-
-double Weeklyreport::waitingtime2(double a, double b){
-    return b - a;
-}
-
-double Weeklyreport::waitingtime3(double a, double b){
+double Weeklyreport::waitingtime(double a, double b){
     return b - a;
 }
 
@@ -343,9 +330,9 @@ void Weeklyreport::Save(int week,string file_head)
         file_matrix.push_back(file_vector);
     }
 
-    string* s1 = file_matrix[1];
-    string* s2 = file_matrix[2];
-    string* s3 = file_matrix[3];
+    string* s1 = file_matrix[0];
+    string* s2 = file_matrix[1];
+    string* s3 = file_matrix[2];
 	//string s1[] = {"Weekly1File1.txt","Weekly2File1.txt","Weekly3File1.txt","Weekly4File1.txt","Weekly5File1.txt","Weekly6File1.txt","Weekly7File1.txt","Weekly8File1.txt","Weekly9File1.txt","Weekly10File1.txt","Weekly11File1.txt","Weekly12File1.txt"};
     //string s2[] = {"Weekly1File2.txt","Weekly2File2.txt","Weekly3File2.txt","Weekly4File2.txt","Weekly5File2.txt","Weekly6File2.txt","Weekly7File2.txt","Weekly8File2.txt","Weekly9File2.txt","Weekly10File2.txt","Weekly11File2.txt","Weekly12File2.txt"};
     //string s3[] = {"Weekly1File3.txt","Weekly2File3.txt","Weekly3File3.txt","Weekly4File3.txt","Weekly5File3.txt","Weekly6File3.txt","Weekly7File3.txt","Weekly8File3.txt","Weekly9File3.txt","Weekly10File3.txt","Weekly11File3.txt","Weekly12File3.txt"};
@@ -360,7 +347,7 @@ void Weeklyreport::Save(int week,string file_head)
 			<< rl[i]->prof << " "
             << rl[i]->age << " "
             << rl[i]->risk<< " "
-			<< waitingtime1(rl[i]->Time[0], current_time) << endl;
+			<< waitingtime(rl[i]->Time[0], current_time) << " aaa"<<endl;
             ofs.close();
             }
     
@@ -372,18 +359,18 @@ void Weeklyreport::Save(int week,string file_head)
 			<< rl[i]->prof << " "
             << rl[i]->age << " "
             << rl[i]->risk << " "
-			<< waitingtime2(rl[i]->Time[0], rl[i]->Time[1]) << endl;
+			<< waitingtime(rl[i]->Time[0], current_time) << " bbb"<<endl;
             ofs.close();
             }
     
-        else if(rl[i]->status==3 && rl[i]->Time[2]>= (week-1)*7*24) {
+        else if(rl[i]->status==3 && rl[i]->Time[2]>= (week-1)*7*24){
             ofstream ofs;
 	        ofs.open(s3[week-1], ios::app); // 用输出的方式打开文件  -- 写文件
 		    ofs << rl[i]->name << " "
 			<< rl[i]->prof << " "
             << rl[i]->age << " "
             << rl[i]->risk << " "
-			<< waitingtime3(rl[i]->Time[1], rl[i]->Time[2]) << endl;
+			<< waitingtime(rl[i]->Time[1], rl[i]->Time[2]) << " ccc"<< endl;
             ofs.close();
             }
     }        
@@ -449,18 +436,23 @@ void Weeklyreport::Sort(int week)
 			
 }
 
-int Monthlyreport::getlength(vector<person<int>*> report_list){
-    int length=report_list.size();
+int Monthlyreport::getlength(vector<person<int>*> report_list, int month){
+    int length=0;
+    for (int i = 0; i<report_list.size();i++){
+        if (rl[i]->Time[0]>= (month-1)*24*28){
+        length++;
+        }
+    }
     return length;
 }
 
-double Monthlyreport::average_time(vector<person<int>*> report_list){
+double Monthlyreport::average_time(vector<person<int>*> report_list,int month){
     int treatment_number = 0;
     int sum = 0;
-    for (int i = 0; i < getlength(rl); i++){
+    for (int i = 0; i < getlength(rl,month); i++){
         
         if (rl[i]->status==3){
-            double waiting_time = rl[i]->Time[2] - rl[i]->Time[1];
+            double waiting_time = rl[i]->Time[2] - rl[i]->Time[0];
             sum += waiting_time;  
             treatment_number++;   
         }
@@ -469,9 +461,9 @@ double Monthlyreport::average_time(vector<person<int>*> report_list){
     return mean;
 }
     
-int Monthlyreport::appointment_num(vector<person<int>*> report_list){    
+int Monthlyreport::appointment_num(vector<person<int>*> report_list,int month){    
     int appointment_number=0;
-    for (int i = 0; i < getlength(rl); i++){
+    for (int i = 0; i < getlength(rl, month); i++){
         
         if (rl[i]->status==2 || rl[i]->status==3){
             appointment_number++;
@@ -480,9 +472,9 @@ int Monthlyreport::appointment_num(vector<person<int>*> report_list){
     return appointment_number;
 }
 
-int Monthlyreport::withdraw_num(vector<person<int>*> report_list){    
-    int withdraw_number=0;
-    for (int i = 0; i < getlength(rl); i++){
+int Monthlyreport::withdraw_num(vector<person<int>*> report_list,int month){    
+    int withdraw_number = 0;
+    for (int i = 0; i < getlength(rl, month); i++){
         
         if (rl[i]->status==4 || rl[i]->status==5){
             withdraw_number++;
@@ -491,9 +483,9 @@ int Monthlyreport::withdraw_num(vector<person<int>*> report_list){
     return withdraw_number;
 }
 
-int Monthlyreport::treatment_num(vector<person<int>*> report_list){    
-    int treatment_number=0;
-    for (int i = 0; i < getlength(rl); i++){
+int Monthlyreport::treatment_num(vector<person<int>*> report_list,int month){    
+    int treatment_number = 0;
+    for (int i = 0; i < getlength(rl,month); i++){
         
         if (rl[i]->status==3){
             treatment_number++;
@@ -502,9 +494,9 @@ int Monthlyreport::treatment_num(vector<person<int>*> report_list){
     return treatment_number;
 }
 
-int Monthlyreport::register_waiting_num(int id){//register_number-appoint_number
-    int register_waiting_number=0;
-    for (int i = 0; i < getlength(rl); i++){
+int Monthlyreport::register_waiting_num(int id,int month){//register_number-appoint_number
+    int register_waiting_number = 0;
+    for (int i = 0; i < getlength(rl,month); i++){
         
         if (rl[i]->local_id==id && rl[i]->status!=3){
             register_waiting_number++;
@@ -514,7 +506,7 @@ int Monthlyreport::register_waiting_num(int id){//register_number-appoint_number
 }
 
 int Monthlyreport::intotal_waiting_num(int a, int b){//register_number-treatment_number
-    int num = b - a;
+    int num = a - b;
     return num;
 }
 
@@ -524,14 +516,14 @@ void Monthlyreport::Save(int month)
 	//将每个人数据写入到文件中 
             ofstream ofs;
 	        ofs.open(monthly[month-1], ios::app); // 用输出的方式打开文件  -- 写文件
-			ofs << "rigister_number: " << getlength(rl) << "\n"
-            << "Local_register_office0_waiting_number: " << register_waiting_num(0) << "\n"
-            << "Local_register_office1_waiting_number: " << register_waiting_num(1) << "\n"
-            << "Local_register_office2_waiting_number: " << register_waiting_num(2) << "\n"
-            << "intotal_waiting_number: " << intotal_waiting_num(getlength(rl), treatment_num(rl)) << "\n"
-            << "appointment_number: " << appointment_num(rl) << "\n"
-            << "average_waiting_time: " << average_time(rl) << "\n"
-			<< "withdraw_number: " << withdraw_num(rl) << endl;
+			ofs << "rigister_number: " << getlength(rl,month) << "\n"
+            << "Local_register_office0_waiting_number: " << register_waiting_num(0, month) << "\n"
+            << "Local_register_office1_waiting_number: " << register_waiting_num(1, month) << "\n"
+            << "Local_register_office2_waiting_number: " << register_waiting_num(2, month) << "\n"
+            << "intotal_waiting_number: " << intotal_waiting_num(getlength(rl,month), treatment_num(rl,month)) << "\n"
+            << "appointment_number: " << appointment_num(rl,month) << "\n"
+            << "average_waiting_time: " << average_time(rl,month) << "\n"
+			<< "withdraw_number: " << withdraw_num(rl,month) << endl;
             ofs.close();
      
 }
@@ -709,6 +701,7 @@ template<class T>person<T>::person(string tableline)
     int month = atoi(format_time.substr(5,1).c_str()) - 1;
     int day = atoi(format_time.substr(7,1).c_str()) - 1;
     int intHour = atoi(format_time.substr(9,2).c_str());
+
     double Minute = atof(format_time.substr(12,2).c_str());
     double Hour = Minute / 60 + intHour + day * 24 + month * 28 * 24;
     Time = new double[3];
@@ -2065,7 +2058,7 @@ else{//if a endmark string is found at the start of aline, the program has alrea
   if(halfday%2 == 0){
   day++;
   int f_num=fibo_h.getnum();
-  for(int j=0; j<f_num/2; j++){//比例最好大于一半？
+  for(int j=0; j<f_num/2; j++){//比例最好大于一半？,现在一天pop掉所有
   // extract the half number of people with min key from the fibonacci heap everday
   person<int>* temp_person = fibo_h.delete_min(); 
   appointment* a_appointment= new appointment(temp_person, day, hospital_list);
