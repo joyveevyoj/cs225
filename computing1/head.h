@@ -66,6 +66,7 @@ public:
     void punish();   
     void display_all(); //Display all information of this person
     string show_risk();
+    void withdraw_time();
 
     int local_id;   
     int* hospital_id;    //Array with index for the hospital，即hopsital's ranking list 

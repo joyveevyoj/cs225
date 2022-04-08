@@ -189,6 +189,7 @@ template<class T>person<T>::person(string tableline)
     Time[0] = Hour;
     Time[1] = -1;
     Time[2] = -1;
+    Time[3] = -1;
 
 
     if(separate_str[10] == "0")
@@ -314,6 +315,7 @@ template<class T>void person<T>::random_generate(int seed)
     Time[0] = rand() % 2016 + 0.1 * (rand() % 10);//2016h is not considered
     Time[1] = -1;
     Time[2] = -1;
+    Time[3] = -1;
 
     //Create Withdraw and priority letter and other parameters;
     withdraw = false;
@@ -402,8 +404,8 @@ template<class T> double* person<T>::show_hour()
 template<class T> int* person<T>::show_day()
 {
     //Convert hour into day
-    int* Day = new int[3];
-    for(int i = 0;i < 3; i++)
+    int* Day = new int[4];
+    for(int i = 0;i < 4; i++)
     {
         if(((int)this->Time[i]) == -1){
             Day[i] = -1;
@@ -416,8 +418,8 @@ template<class T> int* person<T>::show_day()
 template<class T>int* person<T>::show_half_day()
 {
     //convert hour into half day
-    int* half_day = new int[3];
-    for(int i = 0; i < 3;i++)
+    int* half_day = new int[4];
+    for(int i = 0; i < 4;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -431,8 +433,8 @@ template<class T>int* person<T>::show_half_day()
 template<class T> int* person<T>::show_week()
 {
     //convert hour into week
-    int* Week = new int[3];
-    for(int i = 0; i < 3; i++)
+    int* Week = new int[4];
+    for(int i = 0; i < 4; i++)
     {
         if(((int)this->Time[i]) == -1){
             Week[i] = -1;
@@ -446,8 +448,8 @@ template<class T> int* person<T>::show_week()
 template<class T> int* person<T>::show_month()
 {
     //convert hour into month
-    int* Month = new int[3];
-    for(int i = 0; i < 3;i++)
+    int* Month = new int[4];
+    for(int i = 0; i < 4;i++)
     {
         if(((int)this->Time[i]) == -1){
             Month[i] = -1;
@@ -461,8 +463,8 @@ template<class T> int* person<T>::show_month()
 template<class T>int* person<T>::show_intHour()
 {
     //Get the integer part of hour
-    int* intHour = new int[3];
-    for(int i = 0; i < 3;i++)
+    int* intHour = new int[4];
+    for(int i = 0; i < 4;i++)
     {
         if(((int)Time[i]) == -1)
         {
@@ -477,12 +479,12 @@ template<class T>int* person<T>::show_intHour()
 template<class T>string* person<T>::show_format_time()
 {
     //convert to to standardized form like 2022-01-23 6:00
-    int* Month = new int[3];
-    int* Day = new int[3];
-    double* Hour = new double[3];
-    int* Minute = new int[3];
-    int* intHour = new int[3];
-    string* format_time = new string[3];
+    int* Month = new int[4];
+    int* Day = new int[4];
+    double* Hour = new double[4];
+    int* Minute = new int[4];
+    int* intHour = new int[4];
+    string* format_time = new string[4];
 
     //Set month,day,hour,minute
     Month = this->show_month();
@@ -491,7 +493,7 @@ template<class T>string* person<T>::show_format_time()
     intHour = this->show_intHour();
 
     //Solve the problem of imprecision caused by using double type numbers
-     for(int i = 0; i < 3;i++)
+     for(int i = 0; i < 4;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -510,7 +512,7 @@ template<class T>string* person<T>::show_format_time()
         if(abs(dif - 0.8) < 0.001){Minute[i] = 48;}
         if(abs(dif - 0.9) < 0.001){Minute[i] = 54;}
     }
-    for(int i = 0; i < 3;i++)
+    for(int i = 0; i < 4;i++)
     {
         if(((int)this->Time[i]) == -1)
         {
@@ -570,6 +572,13 @@ template<class T> void person<T>::set_appointment(appointment* r_appoint)
 
     }
 }
+
+
+template<class T>void person<T>::withdraw_time(double hour)
+{
+    Time[3] = hour;
+}
+
 //Set the time when the appointment is assigned
 template<class T>void person<T>::set_assign_appointment_time(double hour)
 {
