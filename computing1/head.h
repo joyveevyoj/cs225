@@ -1,13 +1,20 @@
 #ifndef head_h
 #define head_h
 
+#include <stdio.h>
+#include <iostream>
 #include<vector>
-#include <iostream>  //包含输入输出流头文件
 #include <fstream>
+#include "cassert"
 #include <string>
 #include <cstring>
+#include <stdlib.h>
+#include <time.h>
+#include <cmath>
+#include <iomanip>
+#include <cstdlib>
 using namespace std;
-// a change
+
 
 class appointment; 
 class hospital;
@@ -105,98 +112,77 @@ private:
 };
 
 
-template <class T>
-class Fb_node {
-public:
-    int key;                // 关键字(键值)
-    int degree;            // 度数
-    Fb_node<T> *left;    // 左兄弟
-    Fb_node<T> *right;    // 右兄弟
-    Fb_node<T> *child;    // 第一个孩子节点
-    Fb_node<T> *parent;    // 父节点
-    bool marked;        // 是否被删除第一个孩子
-    person<int>* patient ;
-    
 
-    Fb_node(person<int>* tpatient):key(tpatient->return_key()), degree(0), marked(false),
-                     left(NULL),right(NULL),child(NULL),parent(NULL), patient(tpatient) {
-        key    = tpatient->return_key();
-        degree = 0;
-        marked = false;
-        left   = this;
-        right  = this;
-        parent = NULL;
+template <class T> class Fb_node 
+{
+public:
+    int key;                // use calculated key to have its priority ;
+    person<int>* patient ;     
+    Fb_node<T> *left;       // point to left node 
+    Fb_node<T> *right;      //  point to right node
+    Fb_node<T> *child;      //  point to its child
+    Fb_node<T> *parent;     // point to its parent
+    bool       mark;        // mark whether it has lost child
+    int        degree;      //indicate the number of children
+    Fb_node(person<int>* tpatient):key(tpatient->return_key()), patient(tpatient),mark(false),left(NULL),right(NULL),child(NULL),parent(NULL),degree(0) {
+        key    = tpatient->return_key();  // use constructor to initialize, key is the person's calculate key
+        patient = tpatient ;  // person is this patient
+        left   = this; 
+        right  = this;       // left and right both point to itself
+        parent = NULL;       //parent and child are none
         child  = NULL;
-        patient = tpatient ;
+        degree = 0;         
+        mark = false;
     }
 };
 
-template <class T>
-class Fb_heap {
+template <class T> class Fb_heap {
 private:
-    int keyNum;         // 堆中节点的总数
-    int maxDegree;      // 最大度
-    Fb_node<T> *min;    // 最小节点(某个最小堆的根节点)
-    Fb_node<T> **cons;    // 最大度的内存区域
+    int numnodes;      //number of nodes in the heap
+    Fb_node<T> *min;    // points to the node with minimum value
+    int maxdrg;      // the maxdegree in the heap , in order to compute list space
+    Fb_node<T> **drglist;    // use to store the list of degree 
+
+private:
+    void addlistNode(Fb_node<T> *ptr, Fb_node<T> *root); // add node into the left of root in the list
+    void rmlistNode(Fb_node<T> *ptr); // remove this nodes' pointer from the list of nodes
+    void insert(Fb_node<T> *ptr); // insert new node ptr into the heap
+    Fb_node<T>* getminnode(); // get the tree of the minnode
+    void nodelink(Fb_node<T>* ptr, Fb_node<T>* r); //link ptr to root r and becomes r's child
+    void renewdrg(Fb_node<T> *tparent, int degree); // renew the degree
+    void cut(Fb_node<T> *node, Fb_node<T> *parent); // cut the node into the root list
+    void markcut(Fb_node<T> *ptr) ; // check the mark of the node who lost his child
+    void consolidate(); // let the degree of the nodes in root list are different
+    Fb_node<T>* search(Fb_node<T> *root, person<int>* patient); // from root to search patient
+    Fb_node<T>* search(person<int>* patient); // search the patient
+    void decrease(Fb_node<T> *ptr, T newkey); // decrease key into newkey
+    void increase(Fb_node<T> *ptr, T newkey); // increase key into newkey
+    void update(Fb_node<T> *ptr, T newkey); // update the key in ptr into new key
+    void remove(Fb_node<T> *ptr); // remove ptr from the heap
+
+    void buildlsarea(){ //allocate area for the degree list
+    int olddrg = maxdrg; //store old degree
+    maxdrg = (log(numnodes)/log(2.0)) + 1;
+    if (olddrg >= maxdrg){return;}  // if the old degree is bigger than new maxdgree, return
+    drglist = (Fb_node<T> **)realloc(drglist, sizeof(Fb_heap<T> *) * (maxdrg + 1)); // allocate area
+    }; 
 
 public:
-    Fb_heap();
-    ~Fb_heap();
-
-    // 新建key对应的节点，并将其插入到斐波那契堆中
-    void insert(person<int>* patient);
-    // 移除斐波那契堆中的最小节点
-    person<int>* delete_min();
-    // 将斐波那契堆中键值oldkey更新为newkey
-    void update(person<int>*newpatient, person<int>* oldpatient);
-    // 删除键值为key的节点
-    void remove(person<int>* oldpatient);
-    // 斐波那契堆中是否包含键值key
-    void print();
-    // 销毁
-    void destroy();
-    int getnum(){return keyNum;};
-
-private:
-    // 将node从双链表移除
-    void removeNode(Fb_node<T> *node);
-    // 将node堆结点加入root结点之前(循环链表中)
-    void addNode(Fb_node<T> *node, Fb_node<T> *root);
-    // 将双向链表b链接到双向链表a的后面
-    void catList(Fb_node<T> *a, Fb_node<T> *b);
-    // 将节点node插入到斐波那契堆中
-    void insert(Fb_node<T> *node);
-    // 将"堆的最小结点"从根链表中移除，
-    Fb_node<T>* extractMin();
-    // 将node链接到root根结点
-    void link(Fb_node<T>* node, Fb_node<T>* root);
-    // 创建consolidate所需空间
-    void makeCons();
-    // 合并斐波那契堆的根链表中左右相同度数的树
-    void consolidate();
-    // 修改度数
-    void renewDegree(Fb_node<T> *parent, int degree);
-    // 将node从父节点parent的子链接中剥离出来，并使node成为"堆的根链表"中的一员。
-    void cut(Fb_node<T> *node, Fb_node<T> *parent);
-    // 对节点node进行"级联剪切"
-    void cascadingCut(Fb_node<T> *node) ;
-    // 将斐波那契堆中节点node的值减少为key
-    void decrease(Fb_node<T> *node, T key);
-    // 将斐波那契堆中节点node的值增加为key
-    void increase(Fb_node<T> *node, T key);
-    // 更新斐波那契堆的节点node的键值为key
-    void update(Fb_node<T> *node, T key);
-    // 在最小堆root中查找键值为key的节点
-    Fb_node<T>* search(Fb_node<T> *root, person<int>* patient);
-    // 在斐波那契堆中查找键值为key的节点
-    Fb_node<T>* search(person<int>* patient);
-    // 删除结点node
-    void remove(Fb_node<T> *node);
-    // 销毁斐波那契堆
-    void destroyNode(Fb_node<T> *node);
-    // 打印"斐波那契堆"
-    void print(Fb_node<T> *node, Fb_node<T> *prev, int direction);
+    Fb_heap(){
+    numnodes = 0;
+    maxdrg = 0;  // initialize numnodes and max of degree to 0
+    min = NULL;
+    drglist = NULL; //constructor
+    };
+    /*~Fb_heap();  // deconstructor*/
+    void insert(person<int>* patient); //insert a new patient into the fibonacci heap
+    person<int>* delete_min(); // delete the minnode and return the pointer to this deleted person
+    void update(person<int>*newpatient, person<int>* oldpatient); // update the old patient's key value into new value and new pointer
+    void remove(person<int>* oldpatient);//delete this old patient
+    int getnum(){return numnodes;}; // return number of nodes in the heap
 };
+
+
 class appointment
 {
 public:
