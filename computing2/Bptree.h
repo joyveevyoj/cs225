@@ -2,21 +2,21 @@
 #define BPTREE_H
 
 #include <vector>
-#include "block.h"
+//#include "block.h"
 using namespace std;
 //T is tuple
 //G is primary
 //H is secondary
 
 //测试临时用的block，请不要在意
-// template<class T,class G, class H> class block
-// {
-// public:
-//     void setid(int id);
-//     int getid();
-// private:
-//     int block_id;
-// };
+template<class T,class G, class H> class block
+{
+public:
+    void setid(int id);
+    int getid();
+private:
+    int block_id;
+};
 
 template<class T,class G, class H> class Bptree;
 template<class T,class G, class H> class Bpnode
