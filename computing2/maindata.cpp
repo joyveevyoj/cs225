@@ -1,5 +1,4 @@
-#ifndef index_structure_h
-#define index_structure_h
+
 #include "head.h"
 #include <stdio.h>
 #include <iostream>
@@ -9,8 +8,10 @@ using namespace std;
 template <class T, class G, class H>  block<T, G, H>::block(int mainsize, int oversize){
 mainb_size=mainsize;
 overb_size=oversize;
-tombptr=new T(-100);//测试用的构造函数
+tombptr=new T(-100,-100);//测试用的构造函数
 tomb_num=0;
+l_seperate=-999999;
+r_seperate=-999999;
 h_fillfactor=0.7;
 l_fillfactor=0.3;
 l_sibling=NULL;
@@ -36,7 +37,7 @@ while(low<=high&&m<=mainblock.size()){
     if(mid==high+1){
         mid=(low+high)/2;
         while (mainblock[mid]==tombptr&& mid>=low){mid--;}}//if cannot find non-tomb element in right half, try find one on left side, as the block will be reorganized when too much tomb num, we must be able to find such one
-    if(mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key==pri_key){cout<<mainblock[mid]->pri_key<<"\n";return mainblock[mid];}
+    if(mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key==pri_key){return mainblock[mid];}
     else if (mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key>pri_key){high=mid-1;}
     else if (mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key<pri_key){low=mid+1;}
     m++;
@@ -53,13 +54,14 @@ dataptr.first=this;
 overflowblock.push_back(tuple);
 dataptr.second=overflowblock.size()-1+mainb_size;
 tuple->dataptr=dataptr;
-
-if(overflowblock.size()>=overb_size){sort();/*dataptr=bp_retrieve(pri_key)->dataptr;*/}
-
+if(overflowblock.size()>=overb_size){
+    sort();/*dataptr=bp_retrieve(pri_key)->dataptr;*/}
 if(mainblock.size()>=mainb_size*h_fillfactor){
 split();
 if(bp_retrieve(pri_key)!=NULL){dataptr=bp_retrieve(pri_key)->dataptr;}
 else{dataptr=r_sibling->bp_retrieve(pri_key)->dataptr;}}
+tuple->dataptr=dataptr;
+tuple->dataptr_old=dataptr;
 return dataptr;
 }
 
@@ -146,9 +148,12 @@ for(int i=1; i<mainblock.size(); i++){
 
 }//use inserson sort to sort
 //update all the datapointer
-
 for(int i=0; i<mainblock.size(); i++){
+    (mainblock[i]->dataptr).first=this;
     (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+    if(mainblock[i]->dataptr_old.first!=NULL){
+     a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);//新加，未测试
+     mainblock[i]->dataptr_old=mainblock[i]->dataptr;}
 }
 
 //到b树里去更新 b.update();
@@ -173,16 +178,26 @@ for(int i=mid; i<mainsize; i++){
 mainblock.erase(mainblock.begin()+mid, mainblock.end());
 //update all the datapointer
 for(int i=0; i<mainblock.size(); i++){
+    (mainblock[i]->dataptr).first=this;
     (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+    if(mainblock[i]->dataptr_old.first!=NULL){
+    a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);//新加，未测试
+    mainblock[i]->dataptr_old= mainblock[i]->dataptr;}
 }
 for(int i=0; i<new_block->mainblock.size();i++){
     new_block->mainblock[i]->dataptr.first=new_block;
     new_block->mainblock[i]->dataptr.second=i;
+    if(new_block->mainblock[i]->dataptr_old.first!=NULL){
+     a_btree->b_update(new_block->mainblock[i]->secondary_key, new_block->mainblock[i]->dataptr_old, new_block->mainblock[i]->dataptr);//新加，未测试
+      new_block->mainblock[i]->dataptr_old= new_block->mainblock[i]->dataptr;}
 }
 //到b树里去更新 b.update();
 //update the seperate key in b+ tree
 G new_seperate=mainblock[mainblock.size()-1]->pri_key;//relation 新加pri_key 成员
 //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);*/
+a_Bptree->insert(new_seperate,new_block);
+r_seperate=new_seperate;
+new_block->l_seperate=new_seperate;
 }//split()测试暂时没什么问题？
 
 
@@ -213,16 +228,24 @@ for(int i=0; i<mid-validnum; i++){
 for(int i=0; i<mainblock.size(); i++){
     (mainblock[i]->dataptr).first=this;
     (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
-   
+    if(mainblock[i]->dataptr_old.first!=NULL){
+    a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
+    mainblock[i]->dataptr_old= mainblock[i]->dataptr;}
 }
 for(int i=0; i<r_sibling->mainblock.size();i++){
     r_sibling->mainblock[i]->dataptr.first=r_sibling;
     r_sibling->mainblock[i]->dataptr.second=i;
+    if( r_sibling->mainblock[i]->dataptr_old.first!=NULL){
+    a_btree->b_update(r_sibling->mainblock[i]->secondary_key, r_sibling->mainblock[i]->dataptr_old, r_sibling->mainblock[i]->dataptr);
+    r_sibling->mainblock[i]->dataptr_old= r_sibling->mainblock[i]->dataptr;}
 }
 //到b树里去更新 b.update();
 //update the seperate key in b+ tree
 G new_seperate=mainblock[mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
 //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);
+a_Bptree->delete1(r_seperate, new_seperate);//old seperate 需要在block里存一下
+r_seperate=new_seperate;
+r_sibling->l_seperate=new_seperate;//新加未测试
 return;
 
 }
@@ -241,20 +264,29 @@ l_sibling->mainblock.erase(l_sibling->mainblock.begin()+mid, l_sibling->mainbloc
 for(int i=0; i<mainblock.size(); i++){
     (mainblock[i]->dataptr).first=this;
     (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+    if(mainblock[i]->dataptr_old.first!=NULL){
+    a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
+    mainblock[i]->dataptr_old= mainblock[i]->dataptr;}
 }
 for(int i=0; i<l_sibling->mainblock.size();i++){
     l_sibling->mainblock[i]->dataptr.first=l_sibling;
     l_sibling->mainblock[i]->dataptr.second=i;
+    if(l_sibling-> mainblock[i]->dataptr_old.first!=NULL){
+    a_btree->b_update( l_sibling->mainblock[i]->secondary_key, l_sibling-> mainblock[i]->dataptr_old,  l_sibling->mainblock[i]->dataptr);
+    l_sibling-> mainblock[i]->dataptr_old= l_sibling->mainblock[i]->dataptr;}
 }
 //到b树里去更新 b.update();
 //update the seperate key in b+ tree
 G new_seperate=l_sibling->mainblock[mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
 //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);
+a_Bptree->delete1(l_seperate, new_seperate);//新写未测试
+l_seperate=new_seperate;//新写未测试
+l_sibling->r_seperate=new_seperate;//新写未测试
 return;
 }
 
 //delete one block case
-//push all the elements in right sibling into this block
+//if has right sibling, push all the elements in right sibling into this block
 if(r_sibling!=NULL){//if valid right sibling
  r_sibling->sort();
  for(int i=0; i<r_sibling->mainblock.size(); i++){
@@ -267,16 +299,20 @@ if(r_sibling!=NULL){r_sibling->l_sibling=this;}
  for(int i=0; i<mainblock.size(); i++){
      (mainblock[i]->dataptr).first=this;
      (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+     if(mainblock[i]->dataptr_old.first!=NULL){
+     a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
+     mainblock[i]->dataptr_old= mainblock[i]->dataptr;}
 }
-//到b树里去更新 b.update();
-//到b+树里去删掉一个seperate key 
+//到b+树里去删掉一个seperate key
+a_Bptree->delete2(r_seperate, r_sibling);//新写未测试
+r_seperate=r_sibling->l_seperate;//新写未测试
 return;
 
 }
 else if(l_sibling!= NULL){//if valid left sibling
 l_sibling->sort();
  for(int i=0; i<mainblock.size(); i++){
-     l_sibling->mainblock.push_back(mainblock[i]);//push all in lefgtsibling's mainblock    
+     l_sibling->mainblock.push_back(mainblock[i]);//else, if only has left sibling push all in lefgtsibling's mainblock    
  }    
  //删掉this block 
  l_sibling->r_sibling=this->r_sibling;
@@ -286,9 +322,14 @@ l_sibling->sort();
  for(int i=0; i<l_sibling->mainblock.size(); i++){
      (l_sibling->mainblock[i]->dataptr).first=l_sibling;
      (l_sibling->mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+      if(l_sibling->mainblock[i]->dataptr_old.first!=NULL){
+      a_btree->b_update(l_sibling->mainblock[i]->secondary_key, l_sibling->mainblock[i]->dataptr_old, l_sibling->mainblock[i]->dataptr);
+      l_sibling->mainblock[i]->dataptr_old= l_sibling->mainblock[i]->dataptr;}
 }
 //到b树里去更新 b.update();
 //到b+树里去删掉一个seperate key, 和1个blockptr
+a_Bptree->delete2(l_seperate, this);//新写未测试
+l_sibling->r_seperate=r_seperate;//新写未测试
 return;
 }
 else{
@@ -316,6 +357,10 @@ template <class T, class G, class H>  void block< T,  G,  H>::prettyprint(){
     cout<<tomb_num<<"\n";
     cout<<"the valid num in the block is\n";
     cout<<mainblock.size()+overflowblock.size()-tomb_num<<"\n";
+    if(l_seperate==-999999){cout<<"no left seperate key\n";}
+    else{cout<<"the left seperate key is "<<(l_seperate)<<"\n";}
+    if(r_seperate==-999999){cout<<"no right seperate key\n";}
+    else{cout<<"the right seperate key is "<<(r_seperate);}
     cout<<"\n\n";
 }
 /*
@@ -381,7 +426,7 @@ int main(){
     
 /*}*/
 
-#endif
+
 
 
 
