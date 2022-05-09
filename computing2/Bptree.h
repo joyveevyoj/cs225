@@ -2,20 +2,21 @@
 #define BPTREE_H
 
 #include <vector>
+#include "block.h"
 using namespace std;
 //T is tuple
 //G is primary
 //H is secondary
 
 //测试临时用的block，请不要在意
-template<class T,class G, class H> class block
-{
-public:
-    void setid(int id);
-    int getid();
-private:
-    int block_id;
-};
+// template<class T,class G, class H> class block
+// {
+// public:
+//     void setid(int id);
+//     int getid();
+// private:
+//     int block_id;
+// };
 
 template<class T,class G, class H> class Bptree;
 template<class T,class G, class H> class Bpnode
@@ -39,7 +40,7 @@ public:
     void setnext(Bpnode<T,G,H>* node);
     void printkey();
     void printblock();  //for test
-    //请不要太过于在意一下四个binary search，容易搞混...
+    //请不要太过于在意一下五个search，容易搞混...
     int child_binary_search(G pri_key);         //输入pri_key,返回的是对应的child/block的index
     int retrieve_binary_search(G pri_key);      //和child_binary_search基本一样，只是 = 的位置不同，从而使key间隔的为(]而不是[)
     int key_binary_search(G pri_key);           //供delete使用，用来找到leaf节点上pri_key的index
@@ -55,9 +56,8 @@ private:
     Bpnode<T,G,H>** children;                   //Array of pointers to children of this node, null for leave
     block<T,G,H>** blocks;                      //Array of pointers to blocks for leave nodes.
     Bpnode<T,G,H>* parent;                      //Parent node of this node, NULL for root
-    Bpnode<T,G,H>* prev;                        //pointers to left sibling, only for leaf. NULL if doesn't exist
+    Bpnode<T,G,H>* prev;                        //pointers to left sibling\. NULL if doesn't exist
     Bpnode<T,G,H>* next;                        //...
-   
 };
 
 template<class T,class G,class H> class Bptree

@@ -1,6 +1,7 @@
 
 #include<iostream>
 #include"Bptree.h"
+
 using namespace std;
 
 template<class T, class G, class H>Bpnode<T,G,H>::Bpnode(int node_order)
@@ -68,21 +69,11 @@ template<class T,class G, class H>Bpnode<T,G,H>* Bpnode<T,G,H>::getparent()
 
 template<class T,class G, class H>Bpnode<T,G,H>* Bpnode<T,G,H>::getprev()
 {
-    if(this->is_leaf() == false)
-    {
-        cout << "Get sibling from nonleaf node. Wrong Attempt!" << endl;
-        exit(EXIT_FAILURE);
-    }
     return this->prev;
 }
 
 template<class T,class G, class H>Bpnode<T,G,H>* Bpnode<T,G,H>::getnext()
 {
-    if(this->is_leaf() == false)
-    {
-        cout << "Get sibling from nonleaf node. Wrong Attempt!" << endl;
-        exit(EXIT_FAILURE);
-    }
     return this->next;
 }
 
@@ -123,21 +114,11 @@ template<class T,class G, class H>void Bpnode<T,G,H>::setparent(Bpnode<T,G,H>* n
 
 template<class T,class G, class H>void Bpnode<T,G,H>::setprev(Bpnode<T,G,H>* node)
 {
-    if(this->is_leaf() == false)
-    {
-        cout << "Set sibling in nonleaf node. Wrong Attempt!" << endl;
-        exit(EXIT_FAILURE);
-    }
     prev = node;
 }
 
 template<class T,class G, class H>void Bpnode<T,G,H>::setnext(Bpnode<T,G,H>* node)
 {
-    if(this->is_leaf() == false)
-    {
-        cout << "Set sibling in nonleaf node. Wrong Attempt!" << endl;
-        exit(EXIT_FAILURE);
-    }
     next = node;
 }
 
@@ -303,17 +284,13 @@ template<class T,class G,class H>void Bpnode<T,G,H>::printkey()
 
 template<class T,class G,class H>void Bpnode<T,G,H>::printblock()
 {
-    cout << "[";
+
     for(int i = 0; i < this->num_key + 1;i++)
     {
-        if(i == this->num_key)
-        {
-            cout << this->getblock(i)->getid();
-            continue;
-        }
-        cout << this->getblock(i)->getid() << ", ";
+        cout << "----------Block #" << i << "----------" << endl;
+        this->getblock(i)->prettyprint();
+        cout << "----------------------------" << endl;
     }
-    cout << "]";
 }
 
 
@@ -510,8 +487,6 @@ template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node
     //如果parent也满了，就再继续split
 
     //设置l_node，r_node的sibling
-    if(node->is_leaf() == true)
-    {
         if(node->getprev() != NULL)
         {
             node->getprev()->setnext(l_node);
@@ -524,8 +499,6 @@ template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node
         {
             node->getnext()->setprev(r_node);
         }
-    }
-
     if(new_root_mark == true)
     {
         this->root = parent;
@@ -759,9 +732,9 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         // }
         //-----test sibling over
         //-----test block
-        cout << " with blocks ";
+        cout << " with " << cur_node->num_key + 1 << " blocks:" << endl;
         cur_node->printblock();
-        //-----tset block over
+        //-----test block over
         cout << endl;
         return;
     }
@@ -775,6 +748,27 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         {
             cur_node->getchild(i)->printkey();
         }
+        //----print sibling of nonleaves
+        // cout << " and left sibling ";
+        // if(cur_node->getprev() == NULL)
+        // {
+        //     cout << "(NULL) ";
+        // }
+        // else
+        // {
+        //     cur_node->getprev()->printkey();
+        // }
+        // cout << ", right sibling ";
+        // if(cur_node->getnext() == NULL)
+        // {
+        //     cout << "(NULL) ";  
+        // }
+        // else
+        // {
+        //     cur_node->getnext()->printkey();
+        // }
+        //----print sibling end
+
         cout << endl;
         //go to child of this node
         for(int i = 0; i < cur_node->num_key + 1; i++)
@@ -786,64 +780,13 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
 
 }
 
-template<class T, class G, class H>void block<T,G,H>::setid(int id)
-{
-    block_id = id;
-}
+// template<class T, class G, class H>void block<T,G,H>::setid(int id)
+// {
+//     block_id = id;
+// }
 
-template<class T, class G, class H>int block<T,G,H>::getid()
-{
-    return block_id;
-}
+// template<class T, class G, class H>int block<T,G,H>::getid()
+// {
+//     return block_id;
+// }
 
-int main()
-{
-    // Test insert
-    block<int,int,int>* myblock = new block<int,int,int>[30];
-    for(int i = 0; i < 30; i++)
-    {
-        myblock[i].setid(10 * i);
-    }
-    //myblock[0]:0
-    //myblock[1]:10
-    Bptree<int,int,int>* mytree = new Bptree<int,int,int>;
-    mytree->init_insert(&myblock[1]);
-    mytree->insert(100,&myblock[2]);
-    mytree->insert(200,&myblock[3]);
-    mytree->insert(300,&myblock[4]);
-    mytree->insert(400,&myblock[5]);
-    mytree->insert(500,&myblock[6]);
-    mytree->insert(600,&myblock[7]);
-    mytree->insert(700,&myblock[8]);
-
-    //mytree->insert(350,&myblock[9]);
-    mytree->insert(800,&myblock[9]);
-    mytree->insert(900,&myblock[10]);
-    mytree->insert(1000,&myblock[11]);
-    mytree->insert(1100,&myblock[12]);
-    mytree->insert(1200,&myblock[13]);
-    mytree->insert(1300,&myblock[14]);
-    mytree->insert(1400,&myblock[15]);
-    mytree->insert(1500,&myblock[16]);
-    mytree->insert(1600,&myblock[17]);
-    mytree->insert(1700,&myblock[18]);
-    mytree->insert(1800,&myblock[19]);
-    mytree->insert(1900,&myblock[20]);
-
-    mytree->insert(2000,&myblock[21]);
-    mytree->insert(2100,&myblock[22]);
-    mytree->insert(2200,&myblock[23]);
-    mytree->insert(2300,&myblock[24]);
-    mytree->insert(2400,&myblock[25]);
-    mytree->insert(2500,&myblock[26]);
-    mytree->insert(2600,&myblock[27]);
-    mytree->prettyprint();
-
-    //Test retrieve
-    //cout << mytree->retrieve(2600)->getid() << endl;
-
-    //Test delete1
-    // mytree->delete1(1000,1020);
-    // mytree->prettyprint();
-
-}
