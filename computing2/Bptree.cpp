@@ -1,7 +1,6 @@
 
 #include<iostream>
 #include"Bptree.h"
-
 using namespace std;
 
 template<class T, class G, class H>Bpnode<T,G,H>::Bpnode(int node_order)
@@ -30,7 +29,6 @@ template<class T, class G, class H>Bpnode<T,G,H>::Bpnode(int node_order)
     parent = NULL;
     prev = NULL;
     next = NULL;
-
 }
 
 template<class T, class G, class H>bool Bpnode<T,G,H>::is_leaf()
@@ -285,25 +283,19 @@ template<class T,class G,class H>void Bpnode<T,G,H>::printkey()
 
 template<class T,class G,class H>void Bpnode<T,G,H>::printblock()
 {
-    //需要的版本
-    // for(int i = 0; i < this->num_key + 1;i++)
-    // {
-    //     cout << "----------Block #" << i << "----------" << endl;
-    //     this->getblock(i)->prettyprint();
-    //     cout << "----------------------------" << endl;
-    // }
-    //测试的版本
-    cout << "[";
     for(int i = 0; i < this->num_key + 1; i++)
     {
-        if(i == this->num_key)
-        {
-            cout << this->blocks[i]->getid();
-            continue;
-        }
-        cout << this->blocks[i]->getid() << ", ";
+        cout << "[";
+        if(this->blocks[i]->l_seperate == -999999)
+            cout << "None, ";
+        else
+            cout << this->blocks[i]->l_seperate << ", ";
+        if(this->blocks[i]->r_seperate == -999999)
+            cout << "None";
+        else
+            cout << this->blocks[i]->r_seperate;
+        cout << "] ";
     }
-    cout <<"]";
 }
 
 
@@ -387,7 +379,6 @@ template<class T, class G, class H>void Bptree<T,G,H>::_insert(Bpnode<T,G,H>* cu
 
 template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node)
 {
-
     Bpnode<T,G,H>* parent = node->getparent();
     //if this node is root, create a new root(parent)
     // new_root_mark means a new root is created
@@ -442,10 +433,7 @@ template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node
         r_node->setkey(node->getkey(i), i - (node->num_key / 2 + 1));
         r_node->num_key++;
     }
-    //node->num_key = 5
-    //node-num_key / 2 = 2
-    //node->num_key / 2 + 1 = 3
-    //i = 3,4,5
+
     for(int i = node->num_key / 2 + 1; i < node->num_key + 1; i++)
     {
         if(node->is_leaf() == true)
@@ -457,7 +445,6 @@ template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node
             if(i == node->num_key / 2 + 1)
                 node->getchild(i)->setprev(NULL);
         }
-
     }
     r_node->setparent(parent);
 
@@ -496,9 +483,6 @@ template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node
 
     parent->setchild(l_node, child_index - 1);
     parent->setchild(r_node,child_index);
-    //child_index = 1
-    //i = 2
-    //如果parent也满了，就再继续split
 
     //设置l_node，r_node的sibling
         if(node->getprev() != NULL)
@@ -517,6 +501,7 @@ template<class T, class G, class H>void Bptree<T,G,H>::split(Bpnode<T,G,H>* node
     {
         this->root = parent;
     }
+    //如果parent也满了，就再继续split
     if(parent->num_key - 1 == parent->max_key_num)
     {
         split(parent);
@@ -837,38 +822,36 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         cout << "   ";
         cur_node->printkey();
         cout << " is leaf";
-        //-----test left sibling and right sibling
-        if(cur_node->getprev() == NULL)
-        {
-            cout << " with left sibling (NULL)";
-        }
-        else
-        {
-            cout << " with left sibling ";
-            cur_node->getprev()->printkey();
-        }
-        cout << " and ";
-        if(cur_node->getnext() == NULL)
-        {
-            cout << " right sibling (NULL)";
-        }
-        else
-        {
-            cout << "right sibling ";
-            cur_node->getnext()->printkey();
-        }
-        //-----test sibling over
-        //-----test block
-        //需要的版本: 
-        //cout << " with " << cur_node->num_key + 1 << " blocks:" << endl;
-        //测试的版本：
+        //若需要print sibling，请取消以下注释
+        //---------------------------------
+        // if(cur_node->getprev() == NULL)
+        // {
+        //     cout << " with left sibling (NULL)";
+        // }
+        // else
+        // {
+        //     cout << " with left sibling ";
+        //     cur_node->getprev()->printkey();
+        // }
+        // cout << " and ";
+        // if(cur_node->getnext() == NULL)
+        // {
+        //     cout << " right sibling (NULL)";
+        // }
+        // else
+        // {
+        //     cout << "right sibling ";
+        //     cur_node->getnext()->printkey();
+        // }
+        //------------------------------------
+        //------------------------------------
+        //若需要print block，请取消一下注释
         cout << " with blocks ";
         cur_node->printblock();
-        //-----test block over
+        //------------------------------------
         cout << endl;
         return;
     }
-
     //print current node information first
     cur_node->printkey();
     if(cur_node->is_leaf() == false)
@@ -877,27 +860,29 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         for(int i = 0; i < cur_node->num_key + 1; i++)
         {
             cur_node->getchild(i)->printkey();
+            cout << " ";
         }
-        //----print sibling of nonleaves
-        cout << " and left sibling ";
-        if(cur_node->getprev() == NULL)
-        {
-            cout << "(NULL) ";
-        }
-        else
-        {
-            cur_node->getprev()->printkey();
-        }
-        cout << ", right sibling ";
-        if(cur_node->getnext() == NULL)
-        {
-            cout << "(NULL) ";  
-        }
-        else
-        {
-            cur_node->getnext()->printkey();
-        }
-        //----print sibling end
+        //若需要print sibling，请取消以下注释
+        //---------------------------------
+        // cout << " and left sibling ";
+        // if(cur_node->getprev() == NULL)
+        // {
+        //     cout << "(NULL) ";
+        // }
+        // else
+        // {
+        //     cur_node->getprev()->printkey();
+        // }
+        // cout << ", right sibling ";
+        // if(cur_node->getnext() == NULL)
+        // {
+        //     cout << "(NULL) ";  
+        // }
+        // else
+        // {
+        //     cur_node->getnext()->printkey();
+        // }
+        //-----------------------------------
         cout << endl;
         //Then go to child of this node
         for(int i = 0; i < cur_node->num_key + 1; i++)
@@ -907,15 +892,5 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         }
     }
 
-}
-
-template<class T, class G, class H>void block<T,G,H>::setid(int id)
-{
-    block_id = id;
-}
-
-template<class T, class G, class H>int block<T,G,H>::getid()
-{
-    return block_id;
 }
 
