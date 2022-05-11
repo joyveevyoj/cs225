@@ -60,6 +60,7 @@ template<class T,class G,class H> class Bptree
 {
 public: 
     Bptree(int tree_order = 5);
+	Bpnode<T,G,H>* block_retrieve(block<T,G,H>* blockptr);	//给block的一个辅助函数，给定blockptr，找到该blockptr所在的leaf_node,此函数请确保和block和relation一起使用
     block<T,G,H>* retrieve(G pri_key);                  //给定primary_key, 返回blockptr
     void init_insert(block<T,G,H>* blockptr);           //第一次插入blockptr的时候需要，之后都不要用
     void last_delete();                                 //当b+树只有一个block时也要删除时使用，否则不要使用
@@ -72,6 +73,7 @@ private:
     int order;
     Bpnode<T,G,H>* root;
     //These are all auxiliary functions
+	Bpnode<T,G,H>* _block_retrieve(Bpnode<T,G,H>* cur_node, block<T,G,H>* blockptr);
     void _insert(Bpnode<T,G,H>* cur_node, G pri_key, block<T,G,H>* blockptr);   
     void _delete1(Bpnode<T,G,H>* cur_node, G oldpri_key, G newpri_key);
     void _delete2(Bpnode<T,G,H>* cur_node, G pri_key, block<T,G,H>* blockptr);

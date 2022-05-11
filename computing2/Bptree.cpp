@@ -1,8 +1,8 @@
 
 #include<iostream>
-#include"Bptree.h"
+//#include"Bptree.h"
+#include"head.h"
 using namespace std;
-
 template<class T, class G, class H>Bpnode<T,G,H>::Bpnode(int node_order)
 {
     leaf_status = false;
@@ -36,6 +36,10 @@ template<class T, class G, class H>bool Bpnode<T,G,H>::is_leaf()
    return leaf_status;
 }
 
+template<class T, class G, class H>int Bpnode<T,G,H>::getkeynum()
+{
+    return num_key;
+}
 template<class T, class G, class H>G Bpnode<T,G,H>::getkey(int index)
 {   
     return keys[index];
@@ -306,6 +310,29 @@ template<class T, class G,class H>Bptree<T,G,H>::Bptree(int tree_order)
     root->setleaf(true);
 }
 
+template<class T, class G, class H>Bpnode<T,G,H>* Bptree<T,G,H>::block_retrieve(block<T,G,H>* blockptr)
+{
+    return _block_retrieve(root, blockptr);
+}
+
+template<class T, class G, class H>Bpnode<T,G,H>* Bptree<T,G,H>::_block_retrieve(Bpnode<T,G,H>* cur_node, block<T,G,H>* blockptr)
+{
+    //根据这个block里的第一个key来寻找
+    int index = cur_node->retrieve_binary_search(blockptr->mainblock[0]->pri_key);
+    //如果不是leaf，继续找
+    if(cur_node->is_leaf() == false)
+    {
+        Bpnode<T,G,H>* child = cur_node->getchild(index);
+        return _block_retrieve(child, blockptr);
+    }
+    if(cur_node->is_leaf() == true)
+        return cur_node;
+    cout << "Something Wrong with block retrieve function" << endl;
+    exit(EXIT_FAILURE);
+    
+
+}
+
 template<class T, class G, class H>block<T,G,H>* Bptree<T,G,H>::retrieve(G pri_key)
 {   
     return _retrieve(root, pri_key);
@@ -525,7 +552,6 @@ template<class T, class G, class H>void Bptree<T,G,H>::_delete1(Bpnode<T,G,H>* c
     //如果是leaf，二分找到对应的oldpri_key,更新为newpri_key
     if(cur_node->is_leaf() == true)
     {
-        cur_node->printkey();
         int key_index = cur_node->key_binary_search(oldpri_key);
         cur_node->setkey(newpri_key, key_index);
     }
@@ -893,4 +919,3 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
     }
 
 }
-
