@@ -82,27 +82,25 @@ private:
 public:
 	btree();
 	~btree();
-	bool search(H k);										//search k in root
+	bool search(H se_key);									//search secondary key in root
 	void split(bnode* x, int i);							//split the child whose index is i of node x
-	void insertNon(bnode* x, H k);							//insert the k into the subtree whose root is node x
-	void insert(H k);										//insert the k into root
-	void merge(bnode* x, int i, bnode* y, bnode* z);		//merge node y, key i and node z, x is the parent of y and z
+	void insert_root(bnode* r, H k);						// insert secondary key from given root r
+	void insert(H se_key);									//insert the secondary k 
+	void merge(bnode* x, int i, bnode* y, bnode* z);		//merge bnode y and z and spider key[i], and x is y z's parent,y is the left child node, z is the right child node
 	void deletek(H k);										//delete the k from root
-	void delNon(bnode* x, H k);								//delete the k from the subtree whose root is node x
-	spider<T,G,H>* searchPre(bnode* y);						//get the pre of node y
-	spider<T,G,H>* searchSuc(bnode* z);						//get the suc of node z
-	void shiftRTL(bnode* x, int i, bnode* y, bnode* z);		//x's right child y borrows a key and a child from x's left child of z
-	void shiftLTR(bnode* x, int i, bnode* y, bnode* z);		//...
-	void doShow(bnode* root, int d);						//格式：一个结点表示为(Keynum, seckey1, seckey2...)，->表示为children. 
+	void delete_root(bnode* r, H k);						//delete the k from the subtree r
+	spider<T,G,H>* searchahead(bnode* y);					//get the spider with smallest ahead of y
+	spider<T,G,H>* searchbehind(bnode* z);					//get the spider with biggest behind z
+	void borrowrl(bnode* x, int i, bnode* y, bnode* z);		//x's right child z borrows a spider and a child from x's left child of y
+	void borrowlr(bnode* x, int i, bnode* y, bnode* z);		//x's left child y borrows a spider and a child from x's right child of z
+	void doShow(bnode* root, int d);	
+	void show();											//格式：一个结点表示为(Keynum, seckey1, seckey2...)，->表示为children. 
 															//一个结点所有信息(Sec: 此时的seckey，L_Sep：其所在block的left separate， R_Sep:其所在block的right separate，Loc:其所在block的index)
-	void show();											//API for showing the btrees
-	void doClear(bnode* root);
-	void clear();											//API for free the sources we apply
-	spider<T,G,H>* b_retrieve_B(H k);
-	spider<T,G,H>* b_delete_B(H k);
-	void bp_insert_B(pair<block<T,G,H>*, int> dataptr, H k);
-	void bp_delete_B(pair<block<T,G,H>*, int> dataptr,H k);
-	void b_update(H k, pair<block<T,G,H>*, int> oldptr, pair<block<T,G,H>*, int> newptr);
+	spider<T,G,H>* b_retrieve_B(H k);                        //return the spider with secondarykey k in tree
+	pair<block<T,G,H>*, int> b_delete_B(H k);               // pop one element in spider with key
+	void bp_insert_B(pair<block<T,G,H>*, int> dataptr, H k); //insert dataptr with k into the tree
+	void bp_delete_B(pair<block<T,G,H>*, int> dataptr,H k);  //delete one dataptr with k in the tree
+	void b_update(H k, pair<block<T,G,H>*, int> oldptr, pair<block<T,G,H>*, int> newptr);//in spider with key,update oldptr into newptr
 	
 };
 
@@ -231,6 +229,7 @@ public:
 	block<T,G,H>* r_sibling;
 	btree<T,G,H>* a_btree;									//ptr to a b tree
 	Bptree<T,G,H>* a_Bptree;								//ptr to a b+ tree
+	void sort();											//index structure借用一下:-)
 private:
 	T* tombptr;
 	int mainb_size;											//in the datapointer pair, the index for block is the index for mainblock if it is smaller than mainblock size, if its bigger, index-mianblocksize is index in the overflow block
@@ -238,7 +237,7 @@ private:
 	int tomb_num;
 	double h_fillfactor;
 	double l_fillfactor;
-	void sort();
+
 	void split();
 	void merge();
 
@@ -271,7 +270,14 @@ public:
 	void bp_delete_I(G pri_key);
 	vector<T*>* b_retrieve_I(H secon_key);
 	void b_delete_I(H secon_key);
+																//请注意，query操作会把范围内的overblock的东西都放入mainblock，b树的dataptr也会相应改变
+	vector<T*>* range(G init_key, G last_key);					//找到在init_key和last_key之间所有的tuple，返回一个指向储存的vector的指针
+	vector<T*>* query(G init_key, G last_key);					//获得query的结果
+	vector<T*>* query(G pri_key);								//只输入一个key情况下的查询			
 	void prettyprint();
+	void printblock();
+	void printBptree();
+	void printbtree();
 };
 
 

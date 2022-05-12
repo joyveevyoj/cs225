@@ -160,25 +160,43 @@ template <class T, class G, class H>  T* block< T,  G,  H>::b_retrieve(pair<bloc
 
 template <class T, class G, class H>  void block< T,  G,  H>::b_delete(pair<block<T,G,H>*, int> dataptr)
 {
+    this->prettyprint();
     //if the tuple is in mainblock, mark it with tombptr
     int index;
-    if(dataptr.second <mainb_size)
+    if(dataptr.second < mainb_size)
     {
-        index=dataptr.second;
-        mainblock[index]=tombptr;
+        index = dataptr.second;
+        mainblock[index] = tombptr;
         tomb_num++;
     }
     //if the tuple is in overflow block, directly delete it
-    else{
-    index=dataptr.second-mainb_size;
-    overflowblock.erase(overflowblock.begin()+index);
+    else
+    {
+        index = dataptr.second - mainb_size;
+        overflowblock.erase( overflowblock.begin() + index);
+        //overflowblock对应的dataptr也应更新
+        for(int i = 0; i < overflowblock.size(); i++)
+        {
+            (overflowblock[i]->dataptr).first = this;
+            (overflowblock[i]->dataptr).second = i + mainb_size;
+            if(overflowblock[i]->dataptr_old.first != NULL)
+            {
+                a_btree->b_update(overflowblock[i]->secondary_key, overflowblock[i]->dataptr_old, overflowblock[i]->dataptr);
+                overflowblock[i]->dataptr_old = overflowblock[i]->dataptr;
+            }
+            
+        }
+
     }
-    if(mainblock.size()+overflowblock.size()-tomb_num<(mainb_size)*l_fillfactor){
+    if(mainblock.size()+overflowblock.size()-tomb_num<(mainb_size)*l_fillfactor)
+    {
         sort();
         merge();
     //b 树里相应的应该已经删掉了
     //b+ 树里的操作在merge里进行了
     }
+
+    
 
     return;
 }//测试基本正确
@@ -541,69 +559,6 @@ template <class T, class G, class H>  void block< T,  G,  H>::prettyprint()
     else{cout<<"Right Seperate Key: "<<(r_seperate);}
     cout<<"\n\n";
 }
-/*
-int main(){
-    relation* tuple_1 = new relation(5);
-    relation* tuple_2 = new relation(4);
-    relation* tuple_3= new relation(2);
-    relation* tuple_4=new relation(3);
-    relation* tuple_5=new relation(8);
-    relation* tuple_6=new relation(9);
-    
-    block<relation,int,int> a_block(5,1);//测试构造函数
-    a_block.insert(5,tuple_1);
-    //a_block.prettyprint();
-    cout<<"in the blocklist\n";
-    for(block<relation,int,int>* ptr=&a_block; ptr!=NULL; ptr=ptr->r_sibling){
-        ptr->prettyprint();
-    }
-    a_block.insert(4,tuple_2);
-    //a_block.prettyprint();
-     cout<<"in the blocklist\n";
-    for(block<relation,int,int>* ptr=&a_block; ptr!=NULL; ptr=ptr->r_sibling){
-        ptr->prettyprint();
-    }
-    a_block.insert(3,tuple_4);
-     cout<<"in the blocklist\n";
-    for(block<relation,int,int>* ptr=&a_block; ptr!=NULL; ptr=ptr->r_sibling){
-        ptr->prettyprint();
-    }
-    a_block.insert(8,tuple_5);
-     cout<<"in the blocklist\n";
-    for(block<relation,int,int>* ptr=&a_block; ptr!=NULL; ptr=ptr->r_sibling){
-        ptr->prettyprint();
-    }
-    //测试merge了
-   a_block.b_delete(tuple_4->dataptr);
-   cout<<"in the blocklist\n";
-   for(block<relation,int,int>* ptr=&a_block; ptr!=NULL; ptr=ptr->r_sibling){
-        ptr->prettyprint();
-    }
-   //此处测试无法和前面同时进行
-    //测试sort()push到main的部分
-    //测试retrieve
-    /*
-   a_block.bp_retrieve(4)->prettyprint();
-     a_block.bp_retrieve(5)->prettyprint();
-     a_block.bp_retrieve(2)->prettyprint();
-    cout<<"from b_retrieve\n";
-    a_block.b_retrieve(tuple_1->dataptr)->prettyprint();
-    a_block.b_retrieve(tuple_2->dataptr)->prettyprint();
-    a_block.b_retrieve(tuple_3->dataptr)->prettyprint();*/
-    
-    //测试delete
-    /*
-    a_block.bp_retrieve(5);
-    a_block.b_delete(tuple_1->dataptr);
-    a_block.prettyprint();
-     a_block.b_delete(tuple_3->dataptr);
-      a_block.prettyprint();*/
-//测试split()
-//测试一组大一点的数据
-
-    
-/*}*/
-
 
 
 
