@@ -149,7 +149,7 @@ void btree<T,G,H>::delNon(bnode* x, H k)
 	if (x->getleaf())
 	{
 
-		if (x->getspider(i) != NULL && k == x->getkey(i))
+		if (i<x->getnumk() && k == x->getkey(i))
 		{
 			//delete x->getspider(i);     ///////
 			for (int j = i + 1; j < x->getnumk(); j++)
@@ -164,7 +164,7 @@ void btree<T,G,H>::delNon(bnode* x, H k)
 	spider<T,G,H>* ans;
 	bnode* z = NULL, *y = x->getchild(i);
 	if (i < x->getnumk()) z = x->getchild(i + 1);
-	if ( x->getspider(i) != NULL &&  k == x->getkey(i))
+	if ( i<x->getnumk() &&  k == x->getkey(i))
 	{
 		if (y->getnumk() >= mindegree) {//get the key from the left node
 			ans = searchPre(y);
