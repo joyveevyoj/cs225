@@ -35,6 +35,16 @@ template <class T, class G, class H> void index_structure<T,G,H>::bp_delete_I(G 
     if(bp_retrieve_I(pri_key)!=NULL)
     {
         H secondary_key = bp_retrieve_I(pri_key)->secondary_key;
+        // block<T,G,H>* blk = i_Bptree->retrieve(pri_key);
+        // // cout << "---This block before delete---" << endl;
+        // // blk->prettyprint();
+        // // cout << "---Left block before delete---" << endl;
+        // // blk->l_sibling->prettyprint();
+        // blk->bp_delete(pri_key);//.first->prettyprint();
+        // cout << "---This block after delete---" << endl;
+        // blk->prettyprint();
+        // cout << "---Left block after delete---" << endl;
+        // blk->l_sibling->prettyprint();
         i_btree->bp_delete_B( i_Bptree->retrieve(pri_key)->bp_delete(pri_key), secondary_key );
     }
     return;

@@ -115,7 +115,7 @@ public:
 	{
 		for(int i = 0; i < datapointer.size(); i++)
 		{
-			cout << "L_Sep:";
+			cout << "(L_Sep:";
 			if(datapointer[i].first->l_seperate == -999999)
 				cout << "None";
 			else
@@ -208,7 +208,7 @@ private:
     void merge(Bpnode<T,G,H>* node);
     void merge1(Bpnode<T,G,H>* l_node, Bpnode<T,G,H>* r_node);  //case 1 的merge,auxiliary function
     void merge2(Bpnode<T,G,H>* l_node, Bpnode<T,G,H>* r_node);  //case 2 的merge,auxiliary function
-    void _prettyprint(Bpnode<T,G,H>* cur_node);
+    void _prettyprint(Bpnode<T,G,H>* cur_node, int level);
 };
 
 template <class T, class G, class H> class block
@@ -251,7 +251,7 @@ public:
 	pair<block<relation, int, int>*, int> dataptr_old;
 	void prettyprint()
 	{
-		cout << "(Loc:" << dataptr.second << " ,Pri:" << pri_key << " ,Sec:" << secondary_key << ") ";
+		cout << "(Loc:" << dataptr.second << ", Pri:" << pri_key << ", Sec:" << secondary_key << ") ";
 	};
 	int pri_key;
 	int secondary_key;

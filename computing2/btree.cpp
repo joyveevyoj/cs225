@@ -118,10 +118,13 @@ void btree<T,G,H>::merge(bnode* x, int i, bnode* y, bnode* z) {
 
 //delete the k from root
 template<class T,class G,class H>
-void btree<T,G,H>::deletek(H k) {		
-	if (search(k)) {
+void btree<T,G,H>::deletek(H k)
+{		
+	if (search(k))
+	{
 		bnode* r = root;
-		if (r->getnumk() == 1 && !r->getleaf()) {
+		if (r->getnumk() == 1 && !r->getleaf())
+		{
 			bnode* y = root->getchild(0);
 			bnode* z = root->getchild(1);
 			if (y->getnumk() == z->getnumk() && z->getnumk() == mindegree - 1) {
@@ -137,11 +140,17 @@ void btree<T,G,H>::deletek(H k) {
 }
 
 template<class T,class G,class H>
-void btree<T,G,H>::delNon(bnode* x, H k) {
+void btree<T,G,H>::delNon(bnode* x, H k)
+{
 	int i = 0;
-	while (i < x->getnumk() && k > x->getkey(i)) i++;
-	if (x->getleaf()) {//Reach the leaf node
-		if (k == x->getkey(i)) {
+	while (i < x->getnumk() && k > x->getkey(i))  i++;
+
+	//Reach the leaf node
+	if (x->getleaf())
+	{
+
+		if (x->getspider(i) != NULL && k == x->getkey(i))
+		{
 			//delete x->getspider(i);     ///////
 			for (int j = i + 1; j < x->getnumk(); j++)
 				x->setspider(j - 1, x->getspider(j));
@@ -150,11 +159,13 @@ void btree<T,G,H>::delNon(bnode* x, H k) {
 		else cout << "The key does not exist!" << endl;
 		return;
 	}
+
 	// the iner node
 	spider<T,G,H>* ans;
 	bnode* z = NULL, *y = x->getchild(i);
 	if (i < x->getnumk()) z = x->getchild(i + 1);
-	if (k == x->getkey(i)) {
+	if ( x->getspider(i) != NULL &&  k == x->getkey(i))
+	{
 		if (y->getnumk() >= mindegree) {//get the key from the left node
 			ans = searchPre(y);
 			delNon(y, ans->second_key);
@@ -249,15 +260,15 @@ void btree<T,G,H>::doShow(bnode* root, int d) {
 	 	cout << "   ";
 	if (d)
 	 	cout << "->";
-	cout << "(" << tmp->getnumk() << ": ";
+	cout << "Node (" << tmp->getnumk() << ": ";
 	for (int i = 0; i < tmp->getnumk(); i++)
 		cout << tmp->getkey(i) << " ";
 	cout << ")";
 
-	cout << " with ";
+	cout << " with \n ";
 	for (int i = 0; i < tmp->getnumk(); i++)
 	    {
-			cout << "(Sec:" << tmp->getkey(i) << ", ";
+			cout << "Tuples with Sec Key " << tmp->getkey(i) << ":\n ";
 			b_retrieve_B(tmp->getkey(i))->dp_show();
 		}
 	if (!tmp->getleaf())
@@ -330,22 +341,23 @@ template<class T,class G,class H> void btree<T,G,H>::bp_insert_B(pair<block<T,G,
 	}
 }
 
-template<class T,class G,class H> void  btree<T,G,H>::bp_delete_B(pair<block<T,G,H>*, int> dataptr,H k){
-	spider<T,G,H>* tempspider=b_retrieve_B(k);
+template<class T,class G,class H> void  btree<T,G,H>::bp_delete_B(pair<block<T,G,H>*, int> dataptr,H k)
+{
+	spider<T,G,H>* tempspider = b_retrieve_B(k);
 	if(tempspider ==NULL){
 		cout<<"no this secondary key"<<endl ;
 		return;
 	}
 	//for(vector<pair<block<T,G,H>*, int>>::iterator iter=tempspider->datapointer.begin();iter!=tempspider->datapointer.end();iter++){        //从vector中删除指定的某一个元素 
-	int num=tempspider->datapointer.size();
+	int num = tempspider->datapointer.size();
 	 for(int i=0; i<num; i++){
     	if(tempspider->datapointer[i]==dataptr){
 			//需不需要delete dataptr？
-        	tempspider->datapointer.erase(tempspider->datapointer.begin()+i);
+        	tempspider->datapointer.erase(tempspider->datapointer.begin() + i);
         	break;
     	}
 	}
-	if(tempspider->datapointer.size()==0){
+	if(tempspider->datapointer.size() == 0){
 		deletek(k) ;
 	}
 }

@@ -837,15 +837,19 @@ template<class T, class G, class H>void Bptree<T,G,H>::merge2(Bpnode<T,G,H>* l_n
 
 template<class T, class G, class H>void Bptree<T,G,H>::prettyprint()
 {
-    _prettyprint(root);
+    _prettyprint(root, 0);
 }
 
-template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H>* cur_node)
+template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H>* cur_node, int level)
 {
     //for leaf, directly print it
     if(cur_node->is_leaf() == true)
     {
-        cout << "   ";
+        for(int i = 0; i < level; i++)
+        {
+            cout << "   ";
+        }
+        
         cur_node->printkey();
         cout << " is leaf";
         //若需要print sibling，请取消以下注释
@@ -879,6 +883,10 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         return;
     }
     //print current node information first
+    for(int i = 0; i < level; i++)
+    {
+        cout << "   ";
+    }
     cur_node->printkey();
     if(cur_node->is_leaf() == false)
     {
@@ -913,8 +921,8 @@ template<class T, class G, class H>void Bptree<T,G,H>::_prettyprint(Bpnode<T,G,H
         //Then go to child of this node
         for(int i = 0; i < cur_node->num_key + 1; i++)
         {
-            cout << "   ";
-            _prettyprint(cur_node->getchild(i));
+            //cout << "  ";
+            _prettyprint(cur_node->getchild(i), level + 1);
         }
     }
 

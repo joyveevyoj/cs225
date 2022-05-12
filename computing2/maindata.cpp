@@ -28,44 +28,49 @@ template <class T, class G, class H>  T* block< T,  G,  H>::bp_retrieve(G pri_ke
 //linear search in the overflow block
 
     for (int i=0; i<overflowblock.size(); i++){
-        if(overflowblock[i]->pri_key==pri_key)
+        if(overflowblock[i]->pri_key == pri_key)
         {
             return overflowblock[i];
         }//relation里面需要写get_prikey函数
     }
 
     //binary search in the main block
-    int low=0, high=mainblock.size()-1, mid;
-    int m=0;//m is the counter that makes sure the while loop do not go forever
-    if(mainblock.size()>0)
+    int low = 0, high = mainblock.size()-1, mid;
+    int m = 0;//m is the counter that makes sure the while loop do not go forever
+    if(mainblock.size() > 0)
     {
-        while(low<=high&&m<=mainblock.size())
+        while(low <= high && m <= mainblock.size() )
         {
-            mid=(low+high)/2;
-            while (mainblock[mid] == tombptr&& mid<=high)
+
+            mid = (low + high) / 2;
+
+            //if the mid is tombptr, search backward, until find one non-tomb element完了死循环了
+            while (mainblock[mid] == tombptr && mid <= high)
             {
                 mid++;
-            }//if the mid is tombptr, search backward, until find one non-tomb element完了死循环了
+            }
 
-            if(mid==high+1){
-                mid=(low+high)/2;
+            //if cannot find non-tomb element in right half, try find one on left side, as the block will be reorganized when too much tomb num, we must be able to find such one
+            if(mid == high + 1)
+            {
+                mid = (low + high) / 2;
                 while (mainblock[mid]==tombptr&& mid>=low)
                 {
                     mid--;
                 }
+            }
 
-            }//if cannot find non-tomb element in right half, try find one on left side, as the block will be reorganized when too much tomb num, we must be able to find such one
-            if(mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key==pri_key)
+            if(mid != low-1 && mainblock[mid]!=tombptr && mainblock[mid]->pri_key == pri_key)
             {
                 return mainblock[mid];
             }
-            else if (mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key>pri_key)
+            else if (mid != low-1 && mainblock[mid] != tombptr && mainblock[mid]->pri_key > pri_key)
             {
-                high=mid-1;
+                high = mid - 1;
             }
-            else if (mid!=low-1&&mainblock[mid]!=tombptr && mainblock[mid]->pri_key<pri_key)
+            else if (mid != low-1 && mainblock[mid] != tombptr && mainblock[mid]->pri_key < pri_key)
             {
-                low=mid+1;
+                low = mid + 1;
             }
             m++;
         }
@@ -132,7 +137,7 @@ template <class T, class G, class H>  pair<block<T,G,H>*, int> block< T,  G,  H>
         index=find->dataptr.second-mainb_size;
         overflowblock.erase(overflowblock.begin()+index);
     }
-    if(mainblock.size()+overflowblock.size()-tomb_num<(mainb_size)*l_fillfactor)
+    if(mainblock.size() + overflowblock.size()-tomb_num < (mainb_size)*l_fillfactor)
     {
         sort();
         merge();
@@ -301,9 +306,9 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
     }
     if(l_sibling!= NULL)
     {
-        l_validnum=l_sibling->mainblock.size()+l_sibling->overflowblock.size()-l_sibling->tomb_num;
+        l_validnum = l_sibling->mainblock.size() + l_sibling->overflowblock.size() - l_sibling->tomb_num;
     }
-    int validnum=mainblock.size()+overflowblock.size()-tomb_num;
+    int validnum = mainblock.size() + overflowblock.size() - tomb_num;
     //subcase, if redistribution with the right sibling
     if(r_validnum != -1 && r_validnum + validnum > 2*l_fillfactor*(mainb_size) && block_index != leaf->getkeynum())
     {
@@ -339,7 +344,8 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
         }
         //到b树里去更新 b.update();
         //update the seperate key in b+ tree
-        G new_seperate=mainblock[mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
+        G new_seperate=mainblock[this->r_sibling->mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
+
         //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);
         a_Bptree->delete1(r_seperate, new_seperate);//old seperate 需要在block里存一下
         r_seperate=new_seperate;
@@ -352,13 +358,13 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
     if(l_validnum != -1 && l_validnum + validnum > 2*l_fillfactor*(mainb_size) && block_index != 0)
     {
         l_sibling->sort();
-        int total=validnum+l_validnum;
-        int mid=total/2;
-        for(int i=l_validnum-1; i>=mid; i--)
+        int total = validnum + l_validnum;
+        int mid = total / 2;
+        for(int i = l_validnum - 1; i >= mid; i--)
         {
             mainblock.insert(mainblock.begin(), l_sibling->mainblock[i]);
         }
-        l_sibling->mainblock.erase(l_sibling->mainblock.begin()+mid, l_sibling->mainblock.begin()+l_validnum);
+        l_sibling -> mainblock.erase(l_sibling->mainblock.begin()+mid, l_sibling->mainblock.begin()+l_validnum);
         //change in b
         //change all dataptr
         for(int i=0; i<mainblock.size(); i++)
@@ -383,7 +389,7 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
         }
         //到b树里去更新 b.update();
         //update the seperate key in b+ tree
-        G new_seperate=l_sibling->mainblock[mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
+        G new_seperate = l_sibling->mainblock[this->l_sibling->mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
         //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);
         a_Bptree->delete1(l_seperate, new_seperate);//新写未测试
         l_seperate=new_seperate;//新写未测试
@@ -503,7 +509,9 @@ template <class T, class G, class H>  void block< T,  G,  H>::prettyprint()
             if(mainblock[i]!=tombptr)
                 mainblock[i]->prettyprint(); 
             else
-                cout<<"A tombstone\n";
+            {
+                cout << "(Loc:" << i << ", Tombstone)";
+            }
     }
     }
 
