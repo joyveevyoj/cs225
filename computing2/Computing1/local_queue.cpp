@@ -381,6 +381,14 @@ template<class T>void person<T>::random_generate(int seed)
 }
 template<class T> void person<T>::set_key()
 {
+    //Key Rule:
+    //int32 is at least required.
+    //0-4: time, units with 0.1h    28 * 3 * 24 * 10 = 20160
+    //5: age priority
+    //6: prof priority
+    //7: treatment priority, emergency > outpatient > vaccination
+    //8: risk priority
+    //9: letter priority
     //register time priority
     T max_key = 117620161;
     int max_time = 20160;
@@ -389,19 +397,27 @@ template<class T> void person<T>::set_key()
     key += age_id * 100000;
     //profession priority
     key += prof_id * 1000000;
+    //treatment priority
+    if(treatment_id == 0)
+        key += 0 * 10000000;
+    if(treatment_id == 1)
+        key += 2 * 10000000;
+    if(treatment_id == 2)
+        key += 1 * 10000000;
     //risk priority
     if( risk_id == 0 || risk_id == 1 || risk_id == 2)
     {
-        key += 10000000;
+        key += 100000000;
     }
     if( risk_id == 2)
     {
         key += 30 * 24 * 10;    //Medium risk extend one month
     }
+
     //letter priority
     if (letter == true)
     {
-        key += 100000000;
+        key += 1000000000;
     }
     //Turn maximum to minimum for Fibonacci heap
     key = max_key - key;
