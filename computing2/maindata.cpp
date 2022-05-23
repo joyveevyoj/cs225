@@ -5,12 +5,12 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
-
+//constructor for block initialization
 template <class T, class G, class H>  block<T, G, H>::block(int mainsize, int oversize)
 {
     mainb_size=mainsize;
     overb_size=oversize;
-    tombptr=new T(-100,-100);//测试用的构造函数
+    tombptr=new T;
     tomb_num=0;
     l_seperate=-999999;
     r_seperate=-999999;
@@ -21,17 +21,16 @@ template <class T, class G, class H>  block<T, G, H>::block(int mainsize, int ov
     a_Bptree = new Bptree<T,G,H>;
     a_btree = new btree<T,G,H>;
 }
-
+//retrieve from bp tree,input a pri_key, return the tuple pointer
 template <class T, class G, class H>  T* block< T,  G,  H>::bp_retrieve(G pri_key){
 
-//mainblock[0]=tombptr;//测试用
 //linear search in the overflow block
 
     for (int i=0; i<overflowblock.size(); i++){
         if(overflowblock[i]->pri_key == pri_key)
         {
             return overflowblock[i];
-        }//relation里面需要写get_prikey函数
+        }
     }
 
     //binary search in the main block
@@ -44,7 +43,7 @@ template <class T, class G, class H>  T* block< T,  G,  H>::bp_retrieve(G pri_ke
 
             mid = (low + high) / 2;
 
-            //if the mid is tombptr, search backward, until find one non-tomb element完了死循环了
+            //if the mid is tombptr, search backward, until find one non-tomb element
             while (mainblock[mid] == tombptr && mid <= high)
             {
                 mid++;
@@ -78,12 +77,12 @@ template <class T, class G, class H>  T* block< T,  G,  H>::bp_retrieve(G pri_ke
 
 
     return NULL;//if not in block pair, return NULL
-}//测试tombptr,应该好了
+}
 
-
+//insert a new tuple into the block
 template <class T, class G, class H>  pair<block<T,G,H>*, int> block< T,  G,  H>::insert( G pri_key, T* tuple)
 {
-
+    //first insert into overflow block
     pair<block<T,G,H>*, int> dataptr;
     dataptr.first = this;
     overflowblock.push_back(tuple);
@@ -91,12 +90,12 @@ template <class T, class G, class H>  pair<block<T,G,H>*, int> block< T,  G,  H>
     tuple->dataptr = dataptr;
     if(overflowblock.size() >= overb_size)
     {
-        sort();/*dataptr=bp_retrieve(pri_key)->dataptr;*/
-    }
+        sort();
+    }//call sort fuction if the overflow block is full
     if(mainblock.size() >= mainb_size * h_fillfactor)
-    {
+    {   sort();
         split();
-    }
+    }//call split function if the mainblock size is bigger than the high factor
     if(bp_retrieve(pri_key) != NULL)
     {
         dataptr=bp_retrieve(pri_key)->dataptr;
@@ -104,13 +103,13 @@ template <class T, class G, class H>  pair<block<T,G,H>*, int> block< T,  G,  H>
     else
     {
         dataptr=r_sibling->bp_retrieve(pri_key)->dataptr;
-    }
+    }//update the dataptr after split or sort
     tuple->dataptr=dataptr;
     tuple->dataptr_old=dataptr;
-    return dataptr;
+    return dataptr;//return the dataptr for further b tree insert
 }
 
-
+//input a pri_key, delete the corresponding tuple, and return the dataptr 
 template <class T, class G, class H>  pair<block<T,G,H>*, int> block< T,  G,  H>::bp_delete(G pri_key)
 {
     pair<block<T,G,H>*, int> dataptr;
@@ -142,9 +141,9 @@ template <class T, class G, class H>  pair<block<T,G,H>*, int> block< T,  G,  H>
         sort();
         merge();
     }
-    return dataptr;//old position in the b tree
-}//merge以外的部分好了
-
+    return dataptr;//return old position in the b tree
+}
+//input a dataptr found from b tree, return the tuple pointer
 template <class T, class G, class H>  T* block< T,  G,  H>::b_retrieve(pair<block<T,G,H>*, int> dataptr)
 {
     if(dataptr.second<mainb_size)
@@ -155,9 +154,9 @@ template <class T, class G, class H>  T* block< T,  G,  H>::b_retrieve(pair<bloc
     {
         return overflowblock[dataptr.second-mainb_size];
     }
-}//测试正确
+}
 
-
+//input a dataptr found from b tree, delete the corresponding tuple
 template <class T, class G, class H>  void block< T,  G,  H>::b_delete(pair<block<T,G,H>*, int> dataptr)
 {
     this->prettyprint();
@@ -174,7 +173,7 @@ template <class T, class G, class H>  void block< T,  G,  H>::b_delete(pair<bloc
     {
         index = dataptr.second - mainb_size;
         overflowblock.erase( overflowblock.begin() + index);
-        //overflowblock对应的dataptr也应更新
+        //dataptrs in overblock should update as well
         for(int i = 0; i < overflowblock.size(); i++)
         {
             (overflowblock[i]->dataptr).first = this;
@@ -192,14 +191,12 @@ template <class T, class G, class H>  void block< T,  G,  H>::b_delete(pair<bloc
     {
         sort();
         merge();
-    //b 树里相应的应该已经删掉了
-    //b+ 树里的操作在merge里进行了
     }
 
     
 
     return;
-}//测试基本正确
+}
 
 
 template <class T, class G, class H>  void block< T,  G,  H>::sort()
@@ -212,7 +209,7 @@ template <class T, class G, class H>  void block< T,  G,  H>::sort()
         overflowblock.pop_back();
     }
     //sort mainblock
-    //换个写法，把所有非tombptr放到临时的，再全部放入新的
+    //remove all the tombptr first by putting them into a temperary vector
     vector<T*> temp_main;
     for (int i=0; i<mainblock.size(); i++)
     {
@@ -236,11 +233,11 @@ template <class T, class G, class H>  void block< T,  G,  H>::sort()
         mainblock[current+1]=k;
 
     }//use inserson sort to sort
-    //update all the datapointer
+    //update all the datapointer and update them in b tree
     for(int i = 0; i < mainblock.size(); i++)
     {
         (mainblock[i]->dataptr).first=this;
-        (mainblock[i]->dataptr).second = i;//relation类里面需要加dataptr成员
+        (mainblock[i]->dataptr).second = i;
         if(mainblock[i]->dataptr_old.first != NULL)
         {
             a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);//新加，未测试
@@ -248,10 +245,10 @@ template <class T, class G, class H>  void block< T,  G,  H>::sort()
         }
     }
 
-    //到b树里去更新 b.update();
+   
 
 }
-//sort函数测试基本没问题
+
 
 
 template <class T, class G, class H>  void block< T,  G,  H>::split()
@@ -278,10 +275,10 @@ template <class T, class G, class H>  void block< T,  G,  H>::split()
     for(int i=0; i<mainblock.size(); i++)
     {
         (mainblock[i]->dataptr).first=this;
-        (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+        (mainblock[i]->dataptr).second=i;
         if(mainblock[i]->dataptr_old.first!=NULL)
         {
-            a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);//新加，未测试
+            a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
             mainblock[i]->dataptr_old= mainblock[i]->dataptr;
         }
     }
@@ -295,25 +292,24 @@ template <class T, class G, class H>  void block< T,  G,  H>::split()
             new_block->mainblock[i]->dataptr_old= new_block->mainblock[i]->dataptr;
         }
     }
-    //到b树里去更新 b.update();
+    //update in b tree b.update();
     //update the seperate key in b+ tree
-    G new_seperate=mainblock[mainblock.size()-1]->pri_key;//relation 新加pri_key 成员
-    //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);*/
+    G new_seperate=mainblock[mainblock.size()-1]->pri_key;
     a_Bptree->insert(new_seperate,new_block);
     new_block->r_seperate=r_seperate;
     r_seperate=new_seperate;
     new_block->l_seperate=new_seperate;
 
-}//split()测试暂时没什么问题？
+}
 
 
 
 
 template <class T, class G, class H>  void block< T,  G,  H>::merge()
 {
-    //此block所在的leaf
+    //the leaf this block is in
     Bpnode<T,G,H>* leaf = a_Bptree->block_retrieve(this);
-    //此block在此leaf的index
+    //the index of this block in he leaf
     int block_index = leaf->block_search(this);
     //case1, redistribution
     int r_validnum=-1;
@@ -344,7 +340,7 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
         for(int i=0; i<mainblock.size(); i++)
         {
             (mainblock[i]->dataptr).first=this;
-            (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+            (mainblock[i]->dataptr).second=i;
             if(mainblock[i]->dataptr_old.first!=NULL)
             {
                 a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
@@ -360,14 +356,12 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
                 r_sibling->mainblock[i]->dataptr_old= r_sibling->mainblock[i]->dataptr;
             }
         }
-        //到b树里去更新 b.update();
+        //update b tree's dataptr
         //update the seperate key in b+ tree
-        G new_seperate=mainblock[this->r_sibling->mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
-
-        //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);
-        a_Bptree->delete1(r_seperate, new_seperate);//old seperate 需要在block里存一下
+        G new_seperate=mainblock[this->mainblock.size()-1]->pri_key;
+        a_Bptree->delete1(r_seperate, new_seperate);
         r_seperate=new_seperate;
-        r_sibling->l_seperate=new_seperate;//新加未测试
+        r_sibling->l_seperate=new_seperate;
         return;
 
     }
@@ -388,7 +382,7 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
         for(int i=0; i<mainblock.size(); i++)
         {
             (mainblock[i]->dataptr).first=this;
-            (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+            (mainblock[i]->dataptr).second=i;
             if(mainblock[i]->dataptr_old.first!=NULL)
             {
                 a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
@@ -405,13 +399,12 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
                 l_sibling-> mainblock[i]->dataptr_old= l_sibling->mainblock[i]->dataptr;
             }
         }
-        //到b树里去更新 b.update();
+        //update the dataptr in b tree
         //update the seperate key in b+ tree
-        G new_seperate = l_sibling->mainblock[this->l_sibling->mainblock.size()-1]->pri_key;//relation 新加pri_key 成员变量
-        //把 new_seperatekey放到b+树里面 b+->new_sepkey(new_seperate);
-        a_Bptree->delete1(l_seperate, new_seperate);//新写未测试
-        l_seperate=new_seperate;//新写未测试
-        l_sibling->r_seperate=new_seperate;//新写未测试
+        G new_seperate = l_sibling->mainblock[this->l_sibling->mainblock.size()-1]->pri_key;
+        a_Bptree->delete1(l_seperate, new_seperate);
+        l_seperate=new_seperate;
+        l_sibling->r_seperate=new_seperate;
         return;
     }
 
@@ -426,44 +419,35 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
         {
             mainblock.push_back(r_sibling->mainblock[i]);//push all in one mainblock    
         }    
-        //删掉右边的sibling block a_maindata->blocklist.删除block_index+1
+        //delete right sibling block 
         block<T,G,H>* old_rsib=r_sibling;
         r_sibling=r_sibling->r_sibling;
         if(r_sibling != NULL)
         {   
             r_sibling->l_sibling=this;
         }
-        //b树去更新
+        //update dataptr in b tree
         for(int i=0; i<mainblock.size(); i++)
         {
             (mainblock[i]->dataptr).first=this;
-            (mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+            (mainblock[i]->dataptr).second=i;
             if(mainblock[i]->dataptr_old.first!=NULL)
             {
                 a_btree->b_update(mainblock[i]->secondary_key, mainblock[i]->dataptr_old, mainblock[i]->dataptr);
                 mainblock[i]->dataptr_old= mainblock[i]->dataptr;
             }
         }
-        //到b+树里去删掉一个seperate key
+        //delete seperate key in b+ tree
 
-
-
-        // cout<<"before delete2, r_sibling\n";
-        // a_Bptree->prettyprint();
-        // cout<<"the seperate key to be deleted is: "<<r_seperate<<"\n";
-
-
-        a_Bptree->delete2(r_seperate,old_rsib);//新写未测试
+        a_Bptree->delete2(r_seperate,old_rsib);
         if(r_sibling!=NULL)
         {
-            r_seperate=old_rsib->r_seperate;//新写未测试
+            r_seperate=old_rsib->r_seperate;
         }
         else
         {
             r_seperate=-999999;
         }
-        // cout<<"after delete2, r_sibling\n";
-        // a_Bptree->prettyprint();//测试用
         return;
 
     }
@@ -475,32 +459,31 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
         {
             l_sibling->mainblock.push_back(mainblock[i]);//else, if only has left sibling push all in lefgtsibling's mainblock    
         }    
-        //删掉this block 
+        // delete this block 
         l_sibling->r_sibling=this->r_sibling;
         if(r_sibling!=NULL)
         {
             r_sibling->l_sibling=l_sibling;
         }
 
-        //b树去更新
+        //update dataptr in b tree
         for(int i=0; i<l_sibling->mainblock.size(); i++)
         {
             (l_sibling->mainblock[i]->dataptr).first=l_sibling;
-            (l_sibling->mainblock[i]->dataptr).second=i;//relation类里面需要加dataptr成员
+            (l_sibling->mainblock[i]->dataptr).second=i;
             if(l_sibling->mainblock[i]->dataptr_old.first!=NULL)
             {
                 a_btree->b_update(l_sibling->mainblock[i]->secondary_key, l_sibling->mainblock[i]->dataptr_old, l_sibling->mainblock[i]->dataptr);
                 l_sibling->mainblock[i]->dataptr_old= l_sibling->mainblock[i]->dataptr;
             }
         }
-        //到b树里去更新 b.update();
-        //到b+树里去删掉一个seperate key, 和1个blockptr
-
-        a_Bptree->delete2(l_seperate, this);//新写未测试
+       // update b tree's dataptr
+        //delete seperate key in b+ key and one block ptr
+        a_Bptree->delete2(l_seperate, this);
         if(l_sibling!=NULL)
         {
             l_sibling->r_seperate=r_seperate;
-        }//新写未测试
+        }
         else
         {
             l_sibling->r_seperate=-999999;
@@ -510,11 +493,11 @@ template <class T, class G, class H>  void block< T,  G,  H>::merge()
     else
     {
         return;
-    }//测试正确
+    }
 
-}//还差删除一个block的情况没有测试
+}
 
-
+//pretty print for testing use
 template <class T, class G, class H>  void block< T,  G,  H>::prettyprint()
 {
     cout<<"Mainblock: ";

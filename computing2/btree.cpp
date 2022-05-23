@@ -1,12 +1,10 @@
-//#include "btree.h"
+
 #include "head.h"
 
 template<class T,class G,class H> btree<T,G,H>::btree(){	
 	root = new bnode();
 	root->setLeaf(true);	//start with leaf node
 }
-
-
 
 
 template<class T,class G,class H>  bool btree<T,G,H>::search(H se_key){	 //search secondary key from the tree root
@@ -259,11 +257,12 @@ template<class T,class G,class H> void btree<T,G,H>::doShow(bnode* root, int d){
 		cout << tmp->getkey(i) << " ";
 	cout << ")";
 
-	cout << " with \n ";
+	cout << " has the following information\n";
 	for (int i = 0; i < tmp->getnumk(); i++)
 	    {
-			cout << "Tuples with Sec Key " << tmp->getkey(i) << ":\n ";
+			cout << "Sec " << tmp->getkey(i) << ": ";
 			b_retrieve_B(tmp->getkey(i))->dp_show();
+			cout << endl;
 		}
 	if (!tmp->getleaf())
 		for (int i = 0; i <= tmp->getnumk(); i++)
@@ -367,4 +366,6 @@ template<class T,class G,class H> void btree<T,G,H>::b_update(H k, pair<block<T,
 	}
 }
 
-
+//Above is the function of B_tree.When I wrote B-tree, I referenced and followed the ideas of one blog of csdn.
+//The link is https://download.csdn.net/download/u013161323/9889346?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165146976816782246443240%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&request_id=165146976816782246443240&biz_id=1&utm_medium=distribute.pc_search_result.none-task-download-2~all~first_rank_ecpm_v1~rank_v31_ecpm-4-9889346.142^v9^control,157^v4^control&utm_term=B%E6%A0%91c%2B%2B
+//And I also improve the functionality of B_tree and wrote comment to show my understanding.
