@@ -1,6 +1,6 @@
 # Medical Treatment System
 
-A simple registration, queueing and report medicla system that involves some data structures. It's a practice project for course CS225 Data structure.
+A simple registration, queueing and report medicla system that involves some data structures. It's a practice project for course CS225 Data Structure.
 
 ## Features
 
@@ -11,7 +11,7 @@ A simple registration, queueing and report medicla system that involves some dat
 ## Diagram
 
 
-![./fig/diagram.png]
+![diagram](./fig/diagram.png)
 
 
 ## Launch
