@@ -1,10 +1,27 @@
-# cs225
-KD sucks
+# Medical Treatment System
 
-Final work of both CA1 and CA2 is contained in Computing2 directory
+A simple registration, queueing and report medicla system that involves some data structures. It's a practice project for course CS225 Data structure.
 
-Everything is included except two already created 1000 and 20000 report files
+## Features
 
-May no KD in heaven
+- Support for registration, queueing and assignment of appointment and reporting.
+- Fibonacci heap for appointment processing.
+- Support for mass medical treatment with B+ tree and B tree.
 
-Amen
+## Diagram
+
+
+![./fig/diagram.png]
+
+
+## Launch
+
+```
+git clone git@github.com:joyveevyoj/cs225.git
+cd cs225/computing2
+make
+./test
+```
+
+The running process may take some time
+
